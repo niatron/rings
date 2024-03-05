@@ -1,0 +1,11 @@
+{
+	"autodeskProduct":	"Fusion360",
+	"type":	"script",
+	"author":	"",
+	"description":	{
+		"":	"Прототип"
+	},
+	"supportedOS":	"windows",
+	"editEnabled":	true,
+	"sourcewindows":	"RingsProto.vcxproj"
+}

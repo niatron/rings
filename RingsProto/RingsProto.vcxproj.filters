@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="RingsProto.cpp" />
+    <ClCompile Include="ComponentUtils.cpp" />
+    <ClCompile Include="RingsProtoCreator.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="RingsProto.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ComponentUtils.h" />
+    <ClInclude Include="RingsProtoCreator.h" />
+  </ItemGroup>
+</Project>
