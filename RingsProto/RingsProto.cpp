@@ -33,7 +33,7 @@ extern "C" XI_EXPORT bool run(const char* context)
 	}
 	
 	ui->messageBox("Start");
-	RingsProtoCreator ringsCreator(4, 3, 12, 0.1, 0.3, 0.3, 0.25, 0.03, 0.01);
+	RingsProtoCreator ringsCreator(3.2, 2.4, 12, 0.1, 0.3, 0.3, 0.25, 0.03, 0.01);
 	ringsCreator.createBody(rootComp);
 
 	ui->messageBox("Ok");

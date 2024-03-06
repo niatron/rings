@@ -10,6 +10,7 @@ using namespace adsk::fusion;
 
 Ptr<Point3D> GetCenterPoint();
 Ptr<Point3D> GetCirclePoint(double radius, double angel);
+Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius, double length, double angel, bool angelIsCenterOfArc = true);
 Ptr<RevolveFeature> RevolveSketch(Ptr<Component> component, Ptr<Sketch> sketch, Ptr<ConstructionAxis> axis, double angelRad);
 Ptr<ExtrudeFeature> ExtrudeSketch(Ptr<Component> component, Ptr<Sketch> sketch, double distance, bool isSymetric = false);
 Ptr<BRepBody> Rotate(Ptr<Component> component, Ptr<BRepBody> body, Ptr<ConstructionAxis> axis, double angel, bool createCopy = false);

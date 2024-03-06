@@ -25,12 +25,17 @@ private:
 	double volfAngel;
 	double clearanceMovable;
 	double clearanceUnmovable;
+	double clearanceBetweenVolfsRate = 0.00;
+	double clearanceBetweenBaseWallAndVolfLeg = 0.04;
+	double baseExternalCornerFilletRadius = 0.4;
+	double baseInternalCornerFilletRadius = 0.5;
 
 	Ptr<Sketch> createSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name);
 	Ptr<Sketch> createSketchBase(Ptr<Component> component);
 	Ptr<Sketch> createSketchCutting(Ptr<Component> component);
 	Ptr<Sketch> createSketchCuttingFinal(Ptr<Component> component);
-	bool isEdgeOnTopFloorCorner(Ptr<BRepEdge> edge);
+	bool isBaseExternalCornerEdge(Ptr<BRepEdge> edge);
+	bool isBaseIntearnalCornerEdge(Ptr<BRepEdge> edge);
 public:
 	RingsProtoCreator(
 		double outerRadius,
@@ -45,6 +50,8 @@ public:
 	);
 	bool createBody(Ptr<Component> component);
 	double getVolfAngel();
-	double getVolfLegAngel();
-	double getVolfLegWithClearanceAngel();
+	double getVolfAngelWithClearance();
+	double getVolfLegOuterLength();
+	double getBaseOuterLength();
+	double getBaseInnerLength();
 };

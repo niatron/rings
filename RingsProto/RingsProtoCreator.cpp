@@ -33,6 +33,7 @@ RingsProtoCreator::RingsProtoCreator(
 bool RingsProtoCreator::createBody(Ptr<Component> component)
 {
 	auto baseSketch = createSketchBase(component);
+
 	auto baseRevolve = RevolveSketch(component, baseSketch, component->xConstructionAxis(), RAD_180);
 	auto baseBody = Rotate(component, baseRevolve->bodies()->item(0), component->zConstructionAxis(), RAD_90, true);
 	baseBody = Combine(component, FeatureOperations::JoinFeatureOperation, baseRevolve->bodies()->item(0), baseBody);
@@ -44,9 +45,13 @@ bool RingsProtoCreator::createBody(Ptr<Component> component)
 
 	baseBody = Combine(component, FeatureOperations::CutFeatureOperation, baseBody, cuttingBody);
 
-	auto edges = GetEdges(baseBody, [=](Ptr<BRepEdge> edge) {return isEdgeOnTopFloorCorner(edge); });
+	auto internalEdges = GetEdges(baseBody, [=](Ptr<BRepEdge> edge) {return isBaseIntearnalCornerEdge(edge); });
+	auto externalEdges = GetEdges(baseBody, [=](Ptr<BRepEdge> edge) {return isBaseExternalCornerEdge(edge); });
 
-	Fillet(component, edges, 0.5);
+	Application::get()->userInterface()->messageBox("IEdges Count = " + std::to_string(internalEdges->count()) + " EEdges Count = " + std::to_string(externalEdges->count()));
+
+	Fillet(component, internalEdges, baseInternalCornerFilletRadius);
+	Fillet(component, externalEdges, baseExternalCornerFilletRadius);
 
 	auto cuttingFinalSketch = createSketchCuttingFinal(component);
 	auto cuttingFinalExtrude = ExtrudeSketch(component, cuttingFinalSketch, outerRadius);
@@ -65,39 +70,46 @@ Ptr<Sketch> RingsProtoCreator::createSketch(Ptr<Component> component, Ptr<Constr
 
 Ptr<Sketch> RingsProtoCreator::createSketchBase(Ptr<Component> component)
 {
-	Ptr<Sketch> baseSketch = createSketch(component, component->xYConstructionPlane(), "BaseSketch");
-	Ptr<SketchPoint> centerPoint = baseSketch->sketchPoints()->add(GetCenterPoint());
+	Ptr<Sketch> sketch = createSketch(component, component->xYConstructionPlane(), "BaseSketch");
 
-	Ptr<SketchArc> arc1 = baseSketch->sketchCurves()->sketchArcs()->addByCenterStartSweep(GetCenterPoint(), GetCirclePoint(outerRadius, RAD_90 - getVolfAngel() / 2.0), getVolfAngel());
-	Ptr<SketchArc> arc2 = baseSketch->sketchCurves()->sketchArcs()->addByCenterStartSweep(GetCenterPoint(), GetCirclePoint(innerRadius, RAD_90 - getVolfAngel() / 2.0), getVolfAngel());
+	auto outerLength = getBaseOuterLength();
+	auto innerLength = getBaseInnerLength();
 
-	Ptr<SketchLine> line1 = baseSketch->sketchCurves()->sketchLines()->addByTwoPoints(arc1->startSketchPoint(), arc2->startSketchPoint());
-	Ptr<SketchLine> line2 = baseSketch->sketchCurves()->sketchLines()->addByTwoPoints(arc1->endSketchPoint(), arc2->endSketchPoint());
-	
-	return baseSketch;
+	auto arc1 = AddArc(sketch, GetCenterPoint(), outerRadius, outerLength, RAD_90);
+	auto arc2 = AddArc(sketch, GetCenterPoint(), innerRadius, innerLength, RAD_90);
+
+	Ptr<SketchLine> line1 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(arc1->startSketchPoint(), arc2->startSketchPoint());
+	Ptr<SketchLine> line2 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(arc1->endSketchPoint(), arc2->endSketchPoint());
+
+	return sketch;
 }
 
-bool RingsProtoCreator::isEdgeOnTopFloorCorner(Ptr<BRepEdge> edge)
+bool RingsProtoCreator::isBaseExternalCornerEdge(Ptr<BRepEdge> edge)
 {
-	return abs(edge->length() - floorTopThickness) < 0.000001 && edge->startVertex()->geometry()->z() > innerRadius;
+	return (edge->startVertex()->geometry()->z() > innerRadius) && (edge->endVertex()->geometry()->z() > innerRadius);
+}
+
+bool RingsProtoCreator::isBaseIntearnalCornerEdge(Ptr<BRepEdge> edge)
+{
+	return  (abs(edge->length() - outerRadius + innerRadius) < 0.02) && ((edge->startVertex()->geometry()->z() > innerRadius) || (edge->endVertex()->geometry()->z() > innerRadius));
 }
 
 Ptr<Sketch> RingsProtoCreator::createSketchCutting(Ptr<Component> component)
 {
 	Ptr<Sketch> sketch = createSketch(component, component->xYConstructionPlane(), "CuttingSketch");
 
-	auto cuttingTopRadius = outerRadius;
-	auto cuttingTopAngel = getVolfLegWithClearanceAngel();
-	auto cuttingBottomRadius = innerRadius + floorBottomThickness;
-	auto cuttingBottomAngel = getVolfAngel() - 2.0 * wallThickness / cuttingBottomRadius;
-	auto cuttingMiddleRadius = outerRadius - floorTopThickness;
-	auto cuttingMiddleAngel = (getVolfAngel() - getVolfLegWithClearanceAngel()) / 2.0 - wallThickness / cuttingMiddleRadius;
+	auto outerLength = getVolfLegOuterLength() + 2.0 * clearanceBetweenBaseWallAndVolfLeg;
+	auto cutIinnerRadius = this->innerRadius + floorBottomThickness;
+	auto innerLength = getVolfAngelWithClearance() * cutIinnerRadius + 2.0 * clearanceBetweenBaseWallAndVolfLeg;
+	auto middleRadius = outerRadius - floorTopThickness;
+	auto miidleLegLength = getVolfAngel() * volfLegRate * middleRadius + 2.0 * clearanceBetweenBaseWallAndVolfLeg;
+	auto miidleLength = (getVolfAngelWithClearance() * middleRadius - miidleLegLength + 2.0 * clearanceBetweenBaseWallAndVolfLeg) / 2.0;
 
-	Ptr<SketchArc> arc1 = sketch->sketchCurves()->sketchArcs()->addByCenterStartSweep(GetCenterPoint(), GetCirclePoint(cuttingTopRadius, RAD_90 - cuttingTopAngel / 2.0), cuttingTopAngel);
-	Ptr<SketchArc> arc2 = sketch->sketchCurves()->sketchArcs()->addByCenterStartSweep(GetCenterPoint(), GetCirclePoint(cuttingBottomRadius, RAD_90 - cuttingBottomAngel / 2.0), cuttingBottomAngel);
+	auto arc1 = AddArc(sketch, GetCenterPoint(), outerRadius, outerLength, RAD_90);
+	auto arc2 = AddArc(sketch, GetCenterPoint(), cutIinnerRadius, innerLength, RAD_90);
 
-	Ptr<SketchArc> arcML = sketch->sketchCurves()->sketchArcs()->addByCenterStartSweep(GetCenterPoint(), GetCirclePoint(cuttingMiddleRadius, RAD_90 + cuttingTopAngel / 2.0), cuttingMiddleAngel);
-	Ptr<SketchArc> arcMR = sketch->sketchCurves()->sketchArcs()->addByCenterStartSweep(GetCenterPoint(), GetCirclePoint(cuttingMiddleRadius, RAD_90 - cuttingTopAngel / 2.0), -cuttingMiddleAngel);
+	auto arcML = AddArc(sketch, GetCenterPoint(), middleRadius, miidleLength, RAD_90 + miidleLegLength / 2.0 / middleRadius, false);
+	auto arcMR = AddArc(sketch, GetCenterPoint(), middleRadius, -miidleLength, RAD_90 - miidleLegLength / 2.0 / middleRadius, false);
 
 	Ptr<SketchLine> line1 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(arc1->startSketchPoint(), arcMR->endSketchPoint());
 	Ptr<SketchLine> line2 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(arc1->endSketchPoint(), arcML->startSketchPoint());
@@ -121,18 +133,28 @@ Ptr<Sketch> RingsProtoCreator::createSketchCuttingFinal(Ptr<Component> component
 }
 
 
-
 double RingsProtoCreator::getVolfAngel()
 {
 	return RAD_360 / volfCount;
 }
 
-double RingsProtoCreator::getVolfLegAngel()
+double RingsProtoCreator::getVolfAngelWithClearance()
 {
-	return getVolfAngel() * volfLegRate;
+	return getVolfAngel() + getVolfAngel() * clearanceBetweenVolfsRate * 2.0;
 }
 
-double RingsProtoCreator::getVolfLegWithClearanceAngel()
+double RingsProtoCreator::getVolfLegOuterLength()
 {
-	return getVolfLegAngel() + 2.0 * clearanceMovable / outerRadius;
+	return getVolfAngel() * volfLegRate * outerRadius;
 }
+
+double RingsProtoCreator::getBaseOuterLength()
+{
+	return getVolfAngelWithClearance() * outerRadius + 2.0 * clearanceBetweenBaseWallAndVolfLeg + 2.0 * wallThickness;
+}
+
+double RingsProtoCreator::getBaseInnerLength()
+{
+	return getVolfAngelWithClearance() * innerRadius + 2.0 * clearanceBetweenBaseWallAndVolfLeg + 2.0 * wallThickness;
+}
+

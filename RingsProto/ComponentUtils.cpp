@@ -11,6 +11,13 @@ Ptr<Point3D> GetCirclePoint(double radius, double angel)
 	return Point3D::create(radius * cos(angel), radius * sin(angel), 0);
 }
 
+Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius, double length, double angel, bool angelIsCenterOfArc)
+{
+	double lengthRad = length / radius;
+	return sketch->sketchCurves()->sketchArcs()->addByCenterStartSweep(circleCentr, GetCirclePoint(radius, angelIsCenterOfArc ? angel - lengthRad / 2.0 : angel), lengthRad);
+}
+
+
 
 Ptr<RevolveFeature> RevolveSketch(Ptr<Component> component, Ptr<Sketch> sketch, Ptr<ConstructionAxis> axis, double angelRad)
 {
