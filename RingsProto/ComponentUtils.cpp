@@ -11,30 +11,57 @@ Ptr<Point3D> GetCirclePoint(double radius, double angel)
 	return Point3D::create(radius * cos(angel), radius * sin(angel), 0);
 }
 
+bool Equal(double a, double b, double delta)
+{
+    return abs(a - b) < delta;
+}
+
+void MessageBox(std::string message)
+{
+    Application::get()->userInterface()->messageBox(message);
+}
+
 Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius, double length, double angel, bool angelIsCenterOfArc)
 {
 	double lengthRad = length / radius;
 	return sketch->sketchCurves()->sketchArcs()->addByCenterStartSweep(circleCentr, GetCirclePoint(radius, angelIsCenterOfArc ? angel - lengthRad / 2.0 : angel), lengthRad);
 }
 
-
-
-Ptr<RevolveFeature> RevolveSketch(Ptr<Component> component, Ptr<Sketch> sketch, Ptr<ConstructionAxis> axis, double angelRad)
+Ptr<SketchLine> AddLine(Ptr<Sketch> sketch, Ptr<Base> startPoint, Ptr<Base> endPoint)
 {
-	auto prof = sketch->profiles()->item(0);
-	auto revInput = component->features()->revolveFeatures()->createInput(prof, axis, FeatureOperations::NewBodyFeatureOperation);
-	revInput->setAngleExtent(false, ValueInput::createByReal(angelRad));
-	auto feature = component->features()->revolveFeatures()->add(revInput);
-	return feature;
+    return sketch->sketchCurves()->sketchLines()->addByTwoPoints(startPoint, endPoint);
 }
 
-Ptr<ExtrudeFeature> ExtrudeSketch(Ptr<Component> component, Ptr<Sketch> sketch, double distance, bool isSymetric)
+Ptr<SketchLine> AddLine(Ptr<Sketch> sketch, double startPointX, double startPointY, double startPointZ, double endPointX, double endPointY, double endPointZ)
 {
-	auto prof = sketch->profiles()->item(0);
-	auto input = component->features()->extrudeFeatures()->createInput(prof, FeatureOperations::NewBodyFeatureOperation);
-	input->setDistanceExtent(isSymetric, ValueInput::createByReal(distance));
-	auto feature = component->features()->extrudeFeatures()->add(input);
-	return feature;
+    return AddLine(sketch, Point3D::create(startPointX, startPointY, startPointZ), Point3D::create(endPointX, endPointY, endPointZ));
+}
+
+
+Ptr<RevolveFeature> Revolve(Ptr<Component> component, Ptr<Profile> profile, Ptr<ConstructionAxis> axis, double angelRad)
+{
+    auto revInput = component->features()->revolveFeatures()->createInput(profile, axis, FeatureOperations::NewBodyFeatureOperation);
+    revInput->setAngleExtent(false, ValueInput::createByReal(angelRad));
+    auto feature = component->features()->revolveFeatures()->add(revInput);
+    return feature;
+}
+
+Ptr<RevolveFeature> Revolve(Ptr<Component> component, Ptr<Sketch> sketch, Ptr<ConstructionAxis> axis, double angelRad)
+{
+    return Revolve(component, sketch->profiles()->item(0), axis, angelRad);
+}
+
+Ptr<ExtrudeFeature> Extrude(Ptr<Component> component, Ptr<Profile> profile, double distance, bool isSymetric)
+{
+    auto input = component->features()->extrudeFeatures()->createInput(profile, FeatureOperations::NewBodyFeatureOperation);
+    input->setDistanceExtent(isSymetric, ValueInput::createByReal(distance));
+    auto feature = component->features()->extrudeFeatures()->add(input);
+    return feature;
+}
+
+Ptr<ExtrudeFeature> Extrude(Ptr<Component> component, Ptr<Sketch> sketch, double distance, bool isSymetric)
+{
+    return Extrude(component, sketch->profiles()->item(0), distance, isSymetric);
 }
 
 Ptr<BRepBody> Rotate(Ptr<Component> component, Ptr<BRepBody> body, Ptr<ConstructionAxis> axis, double angel, bool createCopy)

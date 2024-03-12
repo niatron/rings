@@ -27,13 +27,16 @@ private:
 	double clearanceUnmovable;
 	double clearanceBetweenVolfsRate = 0.00;
 	double clearanceBetweenBaseWallAndVolfLeg = 0.04;
-	double baseExternalCornerFilletRadius = 0.4;
-	double baseInternalCornerFilletRadius = 0.5;
+	double baseExternalCornerFilletRadius = 0.4; // base external corner - is corner at cross of base
+	double baseInternalCornerFilletRadius = 0.5; // base internal corner - is corner inside triangle of 3 base body
+    double baseToothThickness = 0.09;
+    double baseToothCornerFilletRate = 0.3;
 
 	Ptr<Sketch> createSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name);
 	Ptr<Sketch> createSketchBase(Ptr<Component> component);
 	Ptr<Sketch> createSketchCutting(Ptr<Component> component);
 	Ptr<Sketch> createSketchCuttingFinal(Ptr<Component> component);
+    Ptr<BRepBody> createFloorTooth(Ptr<Component> component, double radius, double thickness, double size);
 	bool isBaseExternalCornerEdge(Ptr<BRepEdge> edge);
 	bool isBaseIntearnalCornerEdge(Ptr<BRepEdge> edge);
 public:
