@@ -16,9 +16,58 @@ bool Equal(double a, double b, double delta)
     return abs(a - b) < delta;
 }
 
+bool Equal(Ptr<Point3D> p1, Ptr<Point3D> p2, double delta)
+{
+    return Equal(p1->x(), p2->x(), delta) && Equal(p1->y(), p2->y(), delta) && Equal(p1->z(), p2->z(), delta);
+}
+
+bool Equal(Ptr<SketchLine> line, Ptr<BRepEdge> edge, double delta)
+{
+    auto startPoint1 = line->geometry()->startPoint();
+    auto endPoint1 = line->geometry()->endPoint();
+    auto startPoint2 = edge->startVertex()->geometry();
+    auto endPoint2 = edge->endVertex()->geometry();
+
+    return
+        (Equal(startPoint1, startPoint2, delta) && Equal(endPoint1, endPoint2, delta)) ||
+        (Equal(startPoint1, endPoint2, delta) && Equal(endPoint1, startPoint2, delta));
+}
+
+bool EqualAny(Ptr<BRepEdge> edge, Ptr<SketchLines> lines, double delta)
+{
+    for (int i = 0; i < lines->count(); i++)
+        if (Equal(lines->item(i), edge, delta))
+            return true;
+    return false;
+}
+
 void MessageBox(std::string message)
 {
     Application::get()->userInterface()->messageBox(message);
+}
+
+Ptr<ConstructionPoint> AddConstructionPoint(Ptr<Component> component, Ptr<Base> point)
+{
+    auto input = component->constructionPoints()->createInput();
+    input->setByPoint(point);
+    return component->constructionPoints()->add(input);
+}
+
+Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Point3D> point, Ptr<Vector3D> vector)
+{
+    auto designType = component->parentDesign()->designType();
+    component->parentDesign()->designType(DesignTypes::DirectDesignType);
+    auto input = component->constructionAxes()->createInput();
+    auto line = InfiniteLine3D::create(point, vector);
+    input->setByLine(line);
+    auto axis = component->constructionAxes()->add(input);
+    component->parentDesign()->designType(designType);
+    return axis;
+}
+
+Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Vector3D> vector)
+{
+    return AddConstructionAxis(component, component->originConstructionPoint()->geometry(), vector);
 }
 
 Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius, double length, double angel, bool angelIsCenterOfArc)
@@ -109,7 +158,7 @@ Ptr<ObjectCollection> GetEdges(Ptr<BRepBody> body, std::function <bool(Ptr<BRepE
 	for (int i = 0; i < edges->count(); i++)
 	{
 		auto edge = edges->item(i);
-		//if (abs(edge->length() - length) < 0.000001)
+		
 		if (isGoodEdge(edge))
 			collection->add(edge);
 	}
@@ -123,3 +172,4 @@ Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis)
 	axis->geometry()->getData(point, vector);
 	return vector;
 }
+

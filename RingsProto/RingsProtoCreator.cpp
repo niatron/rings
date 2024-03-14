@@ -28,16 +28,38 @@ RingsProtoCreator::RingsProtoCreator(
 	volfLegRate(volfLegRate),
 	clearanceMovable(clearanceMovable),
 	clearanceUnmovable(clearanceUnmovable)
-{ }
+{
+    
+}
 
 bool RingsProtoCreator::createBody(Ptr<Component> component)
 {
-	auto baseSketch = createSketchBase(component);
+    xy45Axis = AddConstructionAxis(component, Vector3D::create(1, 1, 0));
+    xy135Axis = AddConstructionAxis(component, Vector3D::create(-1, 1, 0));
+    yz135Axis = AddConstructionAxis(component, Vector3D::create(0, -1, 1));
 
-	auto baseRevolve = Revolve(component, baseSketch, component->xConstructionAxis(), RAD_180);
+	auto baseSketch = createSketchBase(component);
+    	
+    auto baseRevolve = Revolve(component, baseSketch, component->xConstructionAxis(), RAD_144);
+    
+    Ptr<BRepFace> baseLeftFace;
+    Ptr<BRepFace> baseRightFace;
+    auto faces = baseRevolve->bodies()->item(0)->faces();
+    
+    for (int i = 0; i < faces->count(); i++)
+    {
+        auto f = faces->item(i);
+        auto pointVector = ToVector<BRepVertex>(f->vertices());
+        if (Where<Ptr<BRepVertex>>(pointVector, [=](Ptr<BRepVertex> vertex) {return vertex->geometry()->x() > 0; }).size() == 4)
+            baseRightFace = f;
+        else if (Where<Ptr<BRepVertex>>(pointVector, [=](Ptr<BRepVertex> vertex) {return vertex->geometry()->x() < 0; }).size() == 4)
+            baseLeftFace = f;
+    }
+
 	auto baseBody = Rotate(component, baseRevolve->bodies()->item(0), component->zConstructionAxis(), RAD_90, true);
 	baseBody = Combine(component, FeatureOperations::JoinFeatureOperation, baseRevolve->bodies()->item(0), baseBody);
-
+    
+    
 	auto cuttingSketch = createSketchCutting(component);
 	auto cuttingRevolve = Revolve(component, cuttingSketch, component->xConstructionAxis(), RAD_180);
 	auto cuttingBody = Rotate(component, cuttingRevolve->bodies()->item(0), component->zConstructionAxis(), RAD_90, true);
@@ -48,28 +70,70 @@ bool RingsProtoCreator::createBody(Ptr<Component> component)
 	auto internalEdges = GetEdges(baseBody, [=](Ptr<BRepEdge> edge) {return isBaseIntearnalCornerEdge(edge); });
 	auto externalEdges = GetEdges(baseBody, [=](Ptr<BRepEdge> edge) {return isBaseExternalCornerEdge(edge); });
 
-	//Application::get()->userInterface()->messageBox("IEdges Count = " + std::to_string(internalEdges->count()) + " EEdges Count = " + std::to_string(externalEdges->count()));
-
 	Fillet(component, internalEdges, baseInternalCornerFilletRadius);
 	Fillet(component, externalEdges, baseExternalCornerFilletRadius);
 
-	auto cuttingFinalSketch = createSketchCuttingFinal(component);
+    auto cuttingFinalSketch = createSketchCuttingFinal(component);
 	auto cuttingFinalExtrude = Extrude(component, cuttingFinalSketch, outerRadius);
 
 	baseBody = Combine(component, FeatureOperations::CutFeatureOperation, baseBody, cuttingFinalExtrude->bodies()->item(0));
 
-    auto baseToothRadius = outerRadius - floorTopThickness / 2.0;
-    auto baseToothSize = (getBaseOuterLength() - getVolfLegOuterLength()) / 2.0 - wallThickness;
-    auto baseToothBody = createFloorTooth(component, baseToothRadius, baseToothThickness, baseToothSize);
-    
-    auto centrSketchPoint = baseSketch->sketchPoints()->add(GetCenterPoint());
-    auto xy45SketchPoint = baseSketch->sketchPoints()->add(Point3D::create(1, 1, 0));
-    auto xy45AxisInput = component->constructionAxes()->createInput();
-    xy45AxisInput->setByTwoPoints(centrSketchPoint, xy45SketchPoint);
-    auto xy45Axis = component->constructionAxes()->add(xy45AxisInput);
+    auto baseArcEdges = GetEdges(baseBody, [=](Ptr<BRepEdge> edge)
+    {
+        if (edge->tangentiallyConnectedEdges()->count() <= 1)
+            return false;
+        auto tedges = edge->tangentiallyConnectedEdges();
+        for (int i = 0; i < tedges->count(); i++)
+        {
+            auto e = tedges->item(i)->cast<BRepEdge>();
+            for (int j = 0; j < e->faces()->count(); j++)
+            {
+                auto f = e->faces()->item(j);
+                if (f == baseLeftFace || f == baseRightFace)
+                    return true;
+            }
+        }
+        return false;
+    });
 
-    auto filletShift = baseInternalCornerFilletRadius * (sqrt(2.0) - 1.0);
-    Rotate(component, baseToothBody, xy45Axis, ((((getBaseOuterLength() - getVolfLegOuterLength()) / 2.0 + getVolfLegOuterLength()) / 2.0 + clearanceBetweenBaseWallAndVolfLeg) * sqrt(2.0) + filletShift) / outerRadius);
+    auto baseArcInsideEdges = GetEdges(baseBody, [=](Ptr<BRepEdge> edge)
+    {
+        if (edge->tangentiallyConnectedEdges()->count() <= 1)
+            return false;
+        auto tedges = edge->tangentiallyConnectedEdges();
+        for (int i = 0; i < tedges->count(); i++)
+        {
+            auto e = tedges->item(i)->cast<BRepEdge>();
+            for (int j = 0; j < e->faces()->count(); j++)
+            {
+                auto f = e->faces()->item(j);
+                if (f == baseLeftFace || f == baseRightFace)
+                    return false;
+            }
+        }
+        return true;
+    });
+    
+    Fillet(component, baseArcEdges, floorTopThickness * baseArcEdgesFilletRate);
+    Fillet(component, baseArcInsideEdges, wallThickness * baseArcEdgesFilletRate);
+
+    auto baseFilletShift = baseInternalCornerFilletRadius * (sqrt(2.0) - 1.0);
+    auto baseTopFloorToothRadius = outerRadius - floorTopThickness / 2.0;
+    auto baseTopFloorToothSize = (getBaseOuterLength() - getVolfLegOuterLength()) / 2.0 - wallThickness;
+    auto baseTopFloorToothRotateAngel = ((((getBaseOuterLength() - getVolfLegOuterLength()) / 2.0 + getVolfLegOuterLength()) / 2.0 + clearanceBetweenBaseWallAndVolfLeg) * sqrt(2.0) + baseFilletShift) / outerRadius;
+    
+    auto baseBottomFloorToothRadius = innerRadius + floorBottomThickness / 2.0;
+    auto baseBottomFloorToothSize = getBaseInnerLength() / 2.0 / innerRadius * baseBottomFloorToothRadius;
+    auto baseBottomFloorToothRotateAngel = (getBaseInnerLength() / 4.0 * sqrt(2.0) + baseFilletShift / 2.0) / innerRadius;
+
+    baseBody = joinFloorToothToBase(component, baseBody, baseTopFloorToothRadius, baseToothThickness, baseTopFloorToothSize, baseTopFloorToothRotateAngel);
+    baseBody = joinFloorToothToBase(component, baseBody, baseBottomFloorToothRadius, baseToothThickness, baseBottomFloorToothSize, baseBottomFloorToothRotateAngel, true);
+    
+    auto baseReflectionBody = Rotate(component, baseBody, yz135Axis, RAD_180, true);
+
+    baseBody = Combine(component, FeatureOperations::JoinFeatureOperation, baseBody, baseReflectionBody);
+
+    Rotate(component, baseBody, component->zConstructionAxis(), RAD_90, true);
 
 	return true;
 }
@@ -107,6 +171,11 @@ bool RingsProtoCreator::isBaseIntearnalCornerEdge(Ptr<BRepEdge> edge)
 	return  (abs(edge->length() - outerRadius + innerRadius) < 0.02) && ((edge->startVertex()->geometry()->z() > innerRadius) || (edge->endVertex()->geometry()->z() > innerRadius));
 }
 
+bool RingsProtoCreator::isBaseWallXFloorsOuterEdge(Ptr<BRepEdge> edge)
+{
+    return  abs(edge->startVertex()->geometry()->x()) + 0.01 > getBaseInnerLength() / 2.0 && abs(edge->endVertex()->geometry()->x()) + 0.01 > getBaseInnerLength() / 2.0;
+}
+
 Ptr<Sketch> RingsProtoCreator::createSketchCutting(Ptr<Component> component)
 {
 	Ptr<Sketch> sketch = createSketch(component, component->xYConstructionPlane(), "CuttingSketch");
@@ -136,10 +205,11 @@ Ptr<Sketch> RingsProtoCreator::createSketchCuttingFinal(Ptr<Component> component
 {
 	Ptr<Sketch> sketch = createSketch(component, component->xYConstructionPlane(), "CuttingFinalSketch");
 
-	Ptr<SketchLine> line1 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(GetCenterPoint(), Point3D::create(outerRadius, -outerRadius, 0));
+    auto clearance = clearanceUnmovable / 2.0;
+    Ptr<SketchLine> line1 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(Point3D::create(0, -clearance, 0), Point3D::create(outerRadius, -outerRadius - clearance, 0));
 	Ptr<SketchLine> line2 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(line1->endSketchPoint(), Point3D::create(outerRadius, outerRadius, 0));
 	Ptr<SketchLine> line3 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(line2->endSketchPoint(), Point3D::create(-outerRadius, outerRadius, 0));
-	Ptr<SketchLine> line4 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(line3->endSketchPoint(), Point3D::create(-outerRadius, -outerRadius, 0));
+    Ptr<SketchLine> line4 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(line3->endSketchPoint(), Point3D::create(-outerRadius, -outerRadius - clearance, 0));
 	Ptr<SketchLine> line5 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(line4->endSketchPoint(), line1->startSketchPoint());
 
 	return sketch;
@@ -160,20 +230,9 @@ Ptr<BRepBody> RingsProtoCreator::createFloorTooth(Ptr<Component> component, doub
 
     auto line1 = AddLine(sketch, arc1->startSketchPoint(), arc2->startSketchPoint());
     auto line2 = AddLine(sketch, arc1->endSketchPoint(), arc2->endSketchPoint());
-
-    /*auto lineSquare1 = AddLine(sketch, -halfSize, halfSize, 0, halfSize, halfSize, 0);
-    auto lineSquare2 = AddLine(sketch, lineSquare1->endSketchPoint(), Point3D::create(halfSize, -halfSize, 0));
-    auto lineSquare3 = AddLine(sketch, lineSquare2->endSketchPoint(), Point3D::create(-halfSize, -halfSize, 0));
-    auto lineSquare4 = AddLine(sketch, lineSquare3->endSketchPoint(), lineSquare1->startSketchPoint());
-    */
-    auto profArc = sketch->profiles()->item(0);
-    //auto profSquare = sketch->profiles()->item(1);
-    
-    auto revolveFeature = Revolve(component, profArc, component->xConstructionAxis(), RAD_180);
-    //auto extrudeFeature = Extrude(component, profSquare, outerRadius);
-
+        
+    auto revolveFeature = Revolve(component, sketch, component->xConstructionAxis(), RAD_180);
     auto body = Rotate(component, revolveFeature->bodies()->item(0), component->zConstructionAxis(), RAD_90, true);
-
     body = Combine(component, FeatureOperations::IntersectFeatureOperation, revolveFeature->bodies()->item(0), body);
 
     auto cornerEdges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return Equal(edge->length(), thickness); });
@@ -183,6 +242,21 @@ Ptr<BRepBody> RingsProtoCreator::createFloorTooth(Ptr<Component> component, doub
     Fillet(component, allEdges, thickness * 0.9 / 2.0);
 
     return body;
+}
+
+Ptr<BRepBody> RingsProtoCreator::joinFloorToothToBase(Ptr<Component> component, Ptr<BRepBody> baseBody, double radius, double thickness, double size, double rotateAngel, bool inverse)
+{
+    auto resultBody = baseBody;
+    auto toothBody = createFloorTooth(component, radius, thickness, size);
+    auto toothCuttingBody = createFloorTooth(component, radius, thickness + 2.0 * clearanceUnmovable, size + 2.0 * clearanceUnmovable);
+
+    Rotate(component, !inverse ? toothBody : toothCuttingBody, xy45Axis, rotateAngel);
+    Rotate(component, !inverse ? toothCuttingBody : toothBody, xy135Axis, -rotateAngel);
+
+    resultBody = Combine(component, FeatureOperations::JoinFeatureOperation, resultBody, toothBody);
+    resultBody = Combine(component, FeatureOperations::CutFeatureOperation, resultBody, toothCuttingBody);
+
+    return resultBody;
 }
 
 

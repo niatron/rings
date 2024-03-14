@@ -11,6 +11,7 @@ using namespace adsk::fusion;
 #define RAD_90 M_PI / 2.0
 #define RAD_180 M_PI
 #define RAD_360 M_PI * 2.0
+#define RAD_144 M_PI * 0.8
 
 class RingsProtoCreator
 {
@@ -29,16 +30,29 @@ private:
 	double clearanceBetweenBaseWallAndVolfLeg = 0.04;
 	double baseExternalCornerFilletRadius = 0.4; // base external corner - is corner at cross of base
 	double baseInternalCornerFilletRadius = 0.5; // base internal corner - is corner inside triangle of 3 base body
+    double baseArcEdgesFilletRate = 0.7;  // arc edges - long edges of base; rate about wallThickness
     double baseToothThickness = 0.09;
     double baseToothCornerFilletRate = 0.3;
+
+    Ptr<ConstructionAxis> xy45Axis;
+    Ptr<ConstructionAxis> xy135Axis;
+    Ptr<ConstructionAxis> yz135Axis;
 
 	Ptr<Sketch> createSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name);
 	Ptr<Sketch> createSketchBase(Ptr<Component> component);
 	Ptr<Sketch> createSketchCutting(Ptr<Component> component);
 	Ptr<Sketch> createSketchCuttingFinal(Ptr<Component> component);
     Ptr<BRepBody> createFloorTooth(Ptr<Component> component, double radius, double thickness, double size);
+    Ptr<BRepBody> joinFloorToothToBase(Ptr<Component> component, Ptr<BRepBody> baseBody, double radius, double thickness, double size, double rotateAngel, bool inverse = false);
 	bool isBaseExternalCornerEdge(Ptr<BRepEdge> edge);
 	bool isBaseIntearnalCornerEdge(Ptr<BRepEdge> edge);
+    /// O######   ######O
+    /// #######   #######
+    /// ###           ###
+    /// ###           ###
+    /// #################
+    /// O###############O
+    bool isBaseWallXFloorsOuterEdge(Ptr<BRepEdge> edge);
 public:
 	RingsProtoCreator(
 		double outerRadius,
