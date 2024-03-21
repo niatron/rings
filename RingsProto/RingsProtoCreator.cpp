@@ -42,25 +42,20 @@ bool RingsProtoCreator::createBody(Ptr<Component> component)
     	
     auto baseRevolve = Revolve(component, baseSketch, component->xConstructionAxis(), RAD_144);
     
-    Ptr<BRepFace> baseLeftFace;
-    Ptr<BRepFace> baseRightFace;
-    auto faces = baseRevolve->bodies()->item(0)->faces();
-    
-    for (int i = 0; i < faces->count(); i++)
-    {
-        auto f = faces->item(i);
-        auto pointVector = ToVector<BRepVertex>(f->vertices());
-        if (Where<Ptr<BRepVertex>>(pointVector, [=](Ptr<BRepVertex> vertex) {return vertex->geometry()->x() > 0; }).size() == 4)
-            baseRightFace = f;
-        else if (Where<Ptr<BRepVertex>>(pointVector, [=](Ptr<BRepVertex> vertex) {return vertex->geometry()->x() < 0; }).size() == 4)
-            baseLeftFace = f;
-    }
+    auto baseLeftFace = getBodyFace(baseRevolve->bodies()->item(0), Left);
+    auto baseRightFace = getBodyFace(baseRevolve->bodies()->item(0), Right);
+    auto baseTopFace = getBodyFace(baseRevolve->bodies()->item(0), Top);
+    auto baseBottomFace = getBodyFace(baseRevolve->bodies()->item(0), Bottom);
+    auto baseTopLeftEdge = getJoinedEdge(baseTopFace, baseLeftFace);
+    auto baseTopRightEdge = getJoinedEdge(baseTopFace, baseRightFace);
+    auto baseBottomLeftEdge = getJoinedEdge(baseBottomFace, baseLeftFace);
+    auto baseBottomRightEdge = getJoinedEdge(baseBottomFace, baseRightFace);
 
 	auto baseBody = Rotate(component, baseRevolve->bodies()->item(0), component->zConstructionAxis(), RAD_90, true);
 	baseBody = Combine(component, FeatureOperations::JoinFeatureOperation, baseRevolve->bodies()->item(0), baseBody);
     
-    
-	auto cuttingSketch = createSketchCutting(component);
+    BaseCuttingParams cuttingParams;
+	auto cuttingSketch = createSketchCutting(component, cuttingParams);
 	auto cuttingRevolve = Revolve(component, cuttingSketch, component->xConstructionAxis(), RAD_180);
 	auto cuttingBody = Rotate(component, cuttingRevolve->bodies()->item(0), component->zConstructionAxis(), RAD_90, true);
 	cuttingBody = Combine(component, FeatureOperations::JoinFeatureOperation, cuttingRevolve->bodies()->item(0), cuttingBody);
@@ -176,22 +171,23 @@ bool RingsProtoCreator::isBaseWallXFloorsOuterEdge(Ptr<BRepEdge> edge)
     return  abs(edge->startVertex()->geometry()->x()) + 0.01 > getBaseInnerLength() / 2.0 && abs(edge->endVertex()->geometry()->x()) + 0.01 > getBaseInnerLength() / 2.0;
 }
 
-Ptr<Sketch> RingsProtoCreator::createSketchCutting(Ptr<Component> component)
+Ptr<Sketch> RingsProtoCreator::createSketchCutting(Ptr<Component> component, BaseCuttingParams& params)
 {
-	Ptr<Sketch> sketch = createSketch(component, component->xYConstructionPlane(), "CuttingSketch");
+	auto sketch = createSketch(component, component->xYConstructionPlane(), "CuttingSketch");
+    
+    params.outerRadius = outerRadius;
+    params.outerLength = getVolfLegOuterLength() + 2.0 * clearanceBetweenBaseWallAndVolfLeg;
+    params.innerRadius = this->innerRadius + floorBottomThickness;
+    params.innerLength = getVolfAngelWithClearance() * params.innerRadius + 2.0 * clearanceBetweenBaseWallAndVolfLeg;
+    params.middleRadius = outerRadius - floorTopThickness;
+    params.miidleLegLength = getVolfAngel() * volfLegRate * params.middleRadius + 2.0 * clearanceBetweenBaseWallAndVolfLeg;
+    params.miidleLength = (getVolfAngelWithClearance() * params.middleRadius - params.miidleLegLength + 2.0 * clearanceBetweenBaseWallAndVolfLeg) / 2.0;
 
-	auto outerLength = getVolfLegOuterLength() + 2.0 * clearanceBetweenBaseWallAndVolfLeg;
-	auto cutIinnerRadius = this->innerRadius + floorBottomThickness;
-	auto innerLength = getVolfAngelWithClearance() * cutIinnerRadius + 2.0 * clearanceBetweenBaseWallAndVolfLeg;
-	auto middleRadius = outerRadius - floorTopThickness;
-	auto miidleLegLength = getVolfAngel() * volfLegRate * middleRadius + 2.0 * clearanceBetweenBaseWallAndVolfLeg;
-	auto miidleLength = (getVolfAngelWithClearance() * middleRadius - miidleLegLength + 2.0 * clearanceBetweenBaseWallAndVolfLeg) / 2.0;
+	auto arc1 = AddArc(sketch, GetCenterPoint(), params.outerRadius, params.outerLength, RAD_90);
+	auto arc2 = AddArc(sketch, GetCenterPoint(), params.innerRadius, params.innerLength, RAD_90);
 
-	auto arc1 = AddArc(sketch, GetCenterPoint(), outerRadius, outerLength, RAD_90);
-	auto arc2 = AddArc(sketch, GetCenterPoint(), cutIinnerRadius, innerLength, RAD_90);
-
-	auto arcML = AddArc(sketch, GetCenterPoint(), middleRadius, miidleLength, RAD_90 + miidleLegLength / 2.0 / middleRadius, false);
-	auto arcMR = AddArc(sketch, GetCenterPoint(), middleRadius, -miidleLength, RAD_90 - miidleLegLength / 2.0 / middleRadius, false);
+	auto arcML = AddArc(sketch, GetCenterPoint(), params.middleRadius, params.miidleLength, RAD_90 + params.miidleLegLength / 2.0 / params.middleRadius, false);
+	auto arcMR = AddArc(sketch, GetCenterPoint(), params.middleRadius, -params.miidleLength, RAD_90 - params.miidleLegLength / 2.0 / params.middleRadius, false);
 
 	Ptr<SketchLine> line1 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(arc1->startSketchPoint(), arcMR->endSketchPoint());
 	Ptr<SketchLine> line2 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(arc1->endSketchPoint(), arcML->startSketchPoint());

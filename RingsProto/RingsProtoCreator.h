@@ -15,6 +15,17 @@ using namespace adsk::fusion;
 
 class RingsProtoCreator
 {
+    class BaseCuttingParams
+    {
+    public:
+        double outerRadius;
+        double outerLength;
+        double innerRadius;
+        double innerLength;
+        double middleRadius;
+        double miidleLength;
+        double miidleLegLength;
+    };
 private:
 	double outerRadius;
 	double innerRadius;
@@ -40,7 +51,7 @@ private:
 
 	Ptr<Sketch> createSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name);
 	Ptr<Sketch> createSketchBase(Ptr<Component> component);
-	Ptr<Sketch> createSketchCutting(Ptr<Component> component);
+    Ptr<Sketch> createSketchCutting(Ptr<Component> component, BaseCuttingParams& params);
 	Ptr<Sketch> createSketchCuttingFinal(Ptr<Component> component);
     Ptr<BRepBody> createFloorTooth(Ptr<Component> component, double radius, double thickness, double size);
     Ptr<BRepBody> joinFloorToothToBase(Ptr<Component> component, Ptr<BRepBody> baseBody, double radius, double thickness, double size, double rotateAngel, bool inverse = false);

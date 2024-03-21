@@ -1,12 +1,26 @@
 #pragma once
+
 #include <Core/CoreAll.h>
 #include <Fusion/FusionAll.h>
 //#include <CAM/CAMAll.h>
 #include <functional>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 using namespace adsk::core;
 using namespace adsk::fusion;
 //using namespace adsk::cam;
+
+#define RAD_90 M_PI / 2.0
+
+enum CubeFaceType {
+    Top,
+    Bottom,
+    Right,
+    Left,
+    Fron,
+    Back
+};
 
 Ptr<Point3D> GetCenterPoint();
 Ptr<Point3D> GetCirclePoint(double radius, double angel);
@@ -14,6 +28,14 @@ bool Equal(double a, double b, double delta = 0.001);
 bool Equal(Ptr<Point3D> p1, Ptr<Point3D> p2, double delta = 0.001);
 bool Equal(Ptr<SketchLine> line, Ptr<BRepEdge> edge, double delta = 0.001);
 bool EqualAny(Ptr<BRepEdge> edge, Ptr<SketchLines> lines, double delta = 0.001);
+bool isPointOnFace(Ptr<BRepFace> face, Ptr<Point3D> point, double tolerance = 0.01);
+bool isPointOnEdge(Ptr<BRepEdge> edge, Ptr<Point3D> point, double tolerance = 0.01);
+Ptr<Point3D> getPointOnSphere(Ptr<Point3D> center, double radius, Ptr<Vector3D> vector);
+
+Ptr<BRepFace> getBodyFace(Ptr<BRepBody> body, CubeFaceType faceType);
+Ptr<BRepFace> getBodyFace(Ptr<BRepBody> body, Ptr<Point3D> pointOnFace, double tolerance);
+Ptr<BRepEdge> getJoinedEdge(Ptr<BRepFace> face1, Ptr<BRepFace> face2);
+
 void MessageBox(std::string message);
 
 Ptr<ConstructionPoint> AddConstructionPoint(Ptr<Component> component, Ptr<Base> point);
@@ -34,6 +56,7 @@ Ptr<BRepBody> Combine(Ptr<Component> component, FeatureOperations operation, Ptr
 Ptr<FilletFeature> Fillet(Ptr<Component> component, Ptr<ObjectCollection> edges, double val);
 
 Ptr<ObjectCollection> GetEdges(Ptr<BRepBody> body, std::function <bool(Ptr<BRepEdge>)> isGoodEdge);
+Ptr<ObjectCollection> GetEdges(std::vector<Ptr<BRepFace>> joinedFaces, std::vector<Ptr<BRepFace>> unjoinedFaces);
 
 Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis);
 

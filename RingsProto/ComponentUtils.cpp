@@ -41,6 +41,82 @@ bool EqualAny(Ptr<BRepEdge> edge, Ptr<SketchLines> lines, double delta)
     return false;
 }
 
+bool isPointOnFace(Ptr<BRepFace> face, Ptr<Point3D> point, double tolerance)
+{
+    Ptr<Point2D> parameter;
+    Ptr<Point3D> newPoint;
+    face->evaluator()->getParameterAtPoint(point, parameter);
+    face->evaluator()->getPointAtParameter(parameter, newPoint);
+
+    return point->isEqualToByTolerance(newPoint, tolerance);
+}
+
+bool isPointOnEdge(Ptr<BRepEdge> edge, Ptr<Point3D> point, double tolerance)
+{
+    double parameter;
+    Ptr<Point3D> newPoint;
+    edge->evaluator()->getParameterAtPoint(point, parameter);
+    edge->evaluator()->getPointAtParameter(parameter, newPoint);
+
+    return point->isEqualToByTolerance(newPoint, tolerance);
+}
+
+Ptr<Point3D> getPointOnSphere(Ptr<Point3D> center, double radius, Ptr<Vector3D> vector)
+{
+    vector->normalize();
+    return Point3D::create(center->x() + radius * vector->x(), center->y() + radius * vector->y(), center->z() + radius * vector->z());
+}
+
+Ptr<BRepFace> getBodyFace(Ptr<BRepBody> body, CubeFaceType faceType)
+{
+    Ptr<Vector3D> normalVector = Vector3D::create(
+        faceType == Right ? 1 : (faceType == Left ? -1 : 0),
+        faceType == Fron ? 1 : (faceType == Back ? -1 : 0),
+        faceType == Top ? 1 : (faceType == Bottom ? -1 : 0));
+
+    auto faces = body->faces();
+    
+    for (int i = 0; i < faces->count(); i++)
+    {
+        auto face = faces->item(i);
+        auto point = face->pointOnFace();
+        Ptr<Vector3D> normal;
+        face->evaluator()->getNormalAtPoint(point, normal);
+        
+        if (normal->angleTo(normalVector) < RAD_90)
+            return face;
+    }
+    return NULL;
+}
+
+Ptr<BRepFace> getBodyFace(Ptr<BRepBody> body, Ptr<Point3D> pointOnFace, double tolerance)
+{
+    auto faces = body->faces();
+
+    for (int i = 0; i < faces->count(); i++)
+    {
+        auto face = faces->item(i);
+        
+        if (isPointOnFace(face, pointOnFace, tolerance))
+            return face;
+    }
+    return NULL;
+}
+
+Ptr<BRepEdge> getJoinedEdge(Ptr<BRepFace> face1, Ptr<BRepFace> face2)
+{
+    auto edges1 = face1->edges();
+    auto edges2 = face2->edges();
+    for (int i = 0; i < edges1->count(); i++)
+    {
+        auto edge1 = edges1->item(i);
+        for (int j = 0; j < edges2->count(); j++)
+            if (edge1 == edges2->item(j))
+                return edge1;
+    }
+    return nullptr;
+}
+
 void MessageBox(std::string message)
 {
     Application::get()->userInterface()->messageBox(message);
@@ -163,6 +239,33 @@ Ptr<ObjectCollection> GetEdges(Ptr<BRepBody> body, std::function <bool(Ptr<BRepE
 			collection->add(edge);
 	}
 	return collection;
+}
+
+Ptr<ObjectCollection> GetEdges(std::vector<Ptr<BRepFace>> joinedFaces, std::vector<Ptr<BRepFace>> unjoinedFaces)
+{
+    auto collection = ObjectCollection::create();
+    auto unjoinedEdges = ObjectCollection::create();
+    
+    for (int i = 0; i < unjoinedFaces.size(); i++)
+    {
+        auto face = unjoinedFaces[i];
+        auto edges = face->edges();
+        for (int j = 0; j < edges->count(); j++)
+            unjoinedEdges->add(edges->item(j));
+    }
+
+    for (int i = 0; i < joinedFaces.size(); i++)
+    {
+        auto face = joinedFaces[i];
+        auto edges = face->edges();
+        for (int j = 0; j < edges->count(); j++)
+        {
+            auto edge = edges->item(j);
+            if (unjoinedEdges->find(edge) < 0 && collection->find(edge) < 0)
+                collection->add(edge);
+        }
+    }
+    return collection;
 }
 
 Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis)
