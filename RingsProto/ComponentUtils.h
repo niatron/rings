@@ -31,6 +31,8 @@ bool EqualAny(Ptr<BRepEdge> edge, Ptr<SketchLines> lines, double delta = 0.001);
 bool isPointOnFace(Ptr<BRepFace> face, Ptr<Point3D> point, double tolerance = 0.01);
 bool isPointOnEdge(Ptr<BRepEdge> edge, Ptr<Point3D> point, double tolerance = 0.01);
 Ptr<Point3D> getPointOnSphere(Ptr<Point3D> center, double radius, Ptr<Vector3D> vector);
+double getTriangleSideLength(double side1, double side2, double angleInRadians);
+double getTriangleLeg(double legB, double angleBInRadians);
 
 Ptr<BRepFace> getBodyFace(Ptr<BRepBody> body, CubeFaceType faceType);
 Ptr<BRepFace> getBodyFace(Ptr<BRepBody> body, Ptr<Point3D> pointOnFace, double tolerance);
@@ -42,7 +44,8 @@ Ptr<ConstructionPoint> AddConstructionPoint(Ptr<Component> component, Ptr<Base> 
 Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Point3D> point, Ptr<Vector3D> vector);
 Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Vector3D> vector);
 
-Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius, double length, double angel, bool angelIsCenterOfArc = true);
+Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius, double length, double pivotAngelInRadian, bool pivotAngelIsCenterOfArc = true);
+Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, Ptr<Point3D> startPoint, Ptr<Point3D> endPoint);
 Ptr<SketchLine> AddLine(Ptr<Sketch> sketch, Ptr<Base> startPoint, Ptr<Base> endPoint);
 Ptr<SketchLine> AddLine(Ptr<Sketch> sketch, double startPointX, double startPointY, double startPointZ, double endPointX, double endPointY, double endPointZ);
 
@@ -51,6 +54,7 @@ Ptr<RevolveFeature> Revolve(Ptr<Component> component, Ptr<Sketch> sketch, Ptr<Co
 Ptr<ExtrudeFeature> Extrude(Ptr<Component> component, Ptr<Profile> profile, double distance, bool isSymetric = false);
 Ptr<ExtrudeFeature> Extrude(Ptr<Component> component, Ptr<Sketch> sketch, double distance, bool isSymetric = false);
 
+Ptr<BRepBody> Move(Ptr<Component> component, Ptr<BRepBody> body, Ptr<ConstructionAxis> axis, double distance, bool createCopy = false);
 Ptr<BRepBody> Rotate(Ptr<Component> component, Ptr<BRepBody> body, Ptr<ConstructionAxis> axis, double angel, bool createCopy = false);
 Ptr<BRepBody> Combine(Ptr<Component> component, FeatureOperations operation, Ptr<BRepBody> body1, Ptr<BRepBody> body2);
 Ptr<FilletFeature> Fillet(Ptr<Component> component, Ptr<ObjectCollection> edges, double val);

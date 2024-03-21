@@ -27,33 +27,37 @@ class RingsProtoCreator
         double miidleLegLength;
     };
 private:
-	double outerRadius;
+    int volfCount;
+    double outerRadius;
 	double innerRadius;
 	double wallThickness;
 	double floorTopThickness;
 	double floorBottomThickness;
 	double volfLegRate;
-	int volfCount;
-	double volfAngel;
-	double clearanceMovable;
-	double clearanceUnmovable;
-	double clearanceBetweenVolfsRate = 0.00;
-	double clearanceBetweenBaseWallAndVolfLeg = 0.04;
+	double clearanceMovable = 0.04;
+	double clearanceUnmovable = 0.02;
+	double clearanceBetweenBaseWallAndVolfLeg = 0.03;
 	double baseExternalCornerFilletRadius = 0.4; // base external corner - is corner at cross of base
 	double baseInternalCornerFilletRadius = 0.5; // base internal corner - is corner inside triangle of 3 base body
     double baseArcEdgesFilletRate = 0.7;  // arc edges - long edges of base; rate about wallThickness
     double baseToothThickness = 0.09;
-    double baseToothCornerFilletRate = 0.3;
+    double baseToothSideCrossSideFilletRate = 0.3;
+    double baseToothSideCrossFloorFilletRate = 0.45;
+    double volfHeigntOverBaseInCenter = 0.3;
+
+    BaseCuttingParams baseCuttingParams;
 
     Ptr<ConstructionAxis> xy45Axis;
     Ptr<ConstructionAxis> xy135Axis;
     Ptr<ConstructionAxis> yz135Axis;
 
-	Ptr<Sketch> createSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name);
+    void Initialize();
+	static Ptr<Sketch> createSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name);
 	Ptr<Sketch> createSketchBase(Ptr<Component> component);
-    Ptr<Sketch> createSketchCutting(Ptr<Component> component, BaseCuttingParams& params);
+    Ptr<Sketch> createSketchCutting(Ptr<Component> component);
 	Ptr<Sketch> createSketchCuttingFinal(Ptr<Component> component);
-    Ptr<BRepBody> createFloorTooth(Ptr<Component> component, double radius, double thickness, double size);
+    Ptr<Sketch> createSketchSquare(Ptr<Component> component, double size);
+    static Ptr<BRepBody> createArcBody(Ptr<Component> component, double radius, double thickness, double size, double sideCrossSideFilletRate = 0, double sideCrossFoolrFilletRate = 0);
     Ptr<BRepBody> joinFloorToothToBase(Ptr<Component> component, Ptr<BRepBody> baseBody, double radius, double thickness, double size, double rotateAngel, bool inverse = false);
 	bool isBaseExternalCornerEdge(Ptr<BRepEdge> edge);
 	bool isBaseIntearnalCornerEdge(Ptr<BRepEdge> edge);
@@ -72,14 +76,13 @@ public:
 		double wallThickness,
 		double floorTopThickness,
 		double floorBottomThickness,
-		double volfLegRate,
-		double clearanceMovable,
-		double clearanceUnmovable
+		double volfLegRate
 	);
-	bool createBody(Ptr<Component> component);
+    bool createBodies(Ptr<Component> component);
+	bool createBaseBody(Ptr<Component> component);
+    bool createVolfBody(Ptr<Component> component);
 	double getVolfAngel();
-	double getVolfAngelWithClearance();
-	double getVolfLegOuterLength();
+	double getVolfLegAngel();
 	double getBaseOuterLength();
 	double getBaseInnerLength();
 };

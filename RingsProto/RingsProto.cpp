@@ -32,11 +32,11 @@ extern "C" XI_EXPORT bool run(const char* context)
 		return false;
 	}
 	
-	ui->messageBox("Start");
-	RingsProtoCreator ringsCreator(3.2, 2.4, 12, 0.1, 0.3, 0.3, 0.25, 0.03, 0.01);
-	ringsCreator.createBody(rootComp);
+	//ui->messageBox("Start");
+	RingsProtoCreator ringsCreator(3.2, 2.4, 12, 0.1, 0.3, 0.3, 0.25);
+	ringsCreator.createBodies(rootComp);
 
-	ui->messageBox("Ok");
+	//ui->messageBox("Ok");
 	
 
 	return true;

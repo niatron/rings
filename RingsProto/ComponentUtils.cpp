@@ -67,6 +67,16 @@ Ptr<Point3D> getPointOnSphere(Ptr<Point3D> center, double radius, Ptr<Vector3D> 
     return Point3D::create(center->x() + radius * vector->x(), center->y() + radius * vector->y(), center->z() + radius * vector->z());
 }
 
+double getTriangleSideLength(double side1, double side2, double angleInRadians)
+{
+    return sqrt(pow(side1, 2) + pow(side2, 2) - 2 * side1 * side2 * cos(angleInRadians));
+}
+
+double getTriangleLeg(double legB, double angleBInRadians)
+{
+    return legB * tan(angleBInRadians);
+}
+
 Ptr<BRepFace> getBodyFace(Ptr<BRepBody> body, CubeFaceType faceType)
 {
     Ptr<Vector3D> normalVector = Vector3D::create(
@@ -146,10 +156,15 @@ Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Vector3D
     return AddConstructionAxis(component, component->originConstructionPoint()->geometry(), vector);
 }
 
-Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius, double length, double angel, bool angelIsCenterOfArc)
+Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius, double length, double pivotAngelInRadian, bool pivotAngelIsCenterOfArc)
 {
 	double lengthRad = length / radius;
-	return sketch->sketchCurves()->sketchArcs()->addByCenterStartSweep(circleCentr, GetCirclePoint(radius, angelIsCenterOfArc ? angel - lengthRad / 2.0 : angel), lengthRad);
+	return sketch->sketchCurves()->sketchArcs()->addByCenterStartSweep(circleCentr, GetCirclePoint(radius, pivotAngelIsCenterOfArc ? pivotAngelInRadian - lengthRad / 2.0 : pivotAngelInRadian), lengthRad);
+}
+
+Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, Ptr<Point3D> startPoint, Ptr<Point3D> endPoint)
+{
+    return sketch->sketchCurves()->sketchArcs()->addByCenterStartEnd(circleCentr, startPoint, endPoint);
 }
 
 Ptr<SketchLine> AddLine(Ptr<Sketch> sketch, Ptr<Base> startPoint, Ptr<Base> endPoint)
@@ -189,22 +204,34 @@ Ptr<ExtrudeFeature> Extrude(Ptr<Component> component, Ptr<Sketch> sketch, double
     return Extrude(component, sketch->profiles()->item(0), distance, isSymetric);
 }
 
+Ptr<BRepBody> Move(Ptr<Component> component, Ptr<BRepBody> body, Ptr<ConstructionAxis> axis, double distance, bool createCopy)
+{
+    auto moveBody = createCopy ? body->copyToComponent(component) : body;
+    auto moveFeatures = component->features()->moveFeatures();
+
+    auto collection = ObjectCollection::create();
+    collection->add(moveBody);
+
+    auto input = moveFeatures->createInput2(collection);
+    auto res = input->defineAsTranslateAlongEntity(axis, ValueInput::createByReal(distance));
+    moveFeatures->add(input);
+    
+    return moveBody;
+}
+
 Ptr<BRepBody> Rotate(Ptr<Component> component, Ptr<BRepBody> body, Ptr<ConstructionAxis> axis, double angel, bool createCopy)
 {
-	Ptr<BRepBody> moveBody = createCopy ? body->copyToComponent(component) : body;
-
-	auto matrix3D = Matrix3D::create();
-	auto vector3D = Vector3D::create();
-	auto point3D = Point3D::create();
-	axis->geometry()->getData(point3D, vector3D);
-	matrix3D->setToRotation(angel, vector3D, point3D);
+	auto moveBody = createCopy ? body->copyToComponent(component) : body;
 	auto moveFeatures = component->features()->moveFeatures();
 
-	Ptr<ObjectCollection> collection = ObjectCollection::create();
+	auto collection = ObjectCollection::create();
 	collection->add(moveBody);
-
-	moveFeatures->add(moveFeatures->createInput(collection, matrix3D));
-	return moveBody;
+    
+    auto input = moveFeatures->createInput2(collection);
+    input->defineAsRotate(axis, ValueInput::createByReal(angel));
+	moveFeatures->add(input);
+	
+    return moveBody;
 }
 
 Ptr<BRepBody> Combine(Ptr<Component> component, FeatureOperations operation, Ptr<BRepBody> body1, Ptr<BRepBody> body2)
