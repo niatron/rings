@@ -52,7 +52,6 @@ private:
     Ptr<ConstructionAxis> yz135Axis;
 
     void Initialize();
-	static Ptr<Sketch> createSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name);
 	Ptr<Sketch> createSketchBase(Ptr<Component> component);
     Ptr<Sketch> createSketchCutting(Ptr<Component> component);
 	Ptr<Sketch> createSketchCuttingFinal(Ptr<Component> component);

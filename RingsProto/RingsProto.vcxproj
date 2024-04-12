@@ -93,6 +93,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ComponentUtils.cpp" />
+    <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="Rings2D2Circles.cpp" />
     <ClCompile Include="RingsProto.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -107,6 +109,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ComponentUtils.h" />
+    <ClInclude Include="Geometry.h" />
+    <ClInclude Include="Rings2D2Circles.h" />
     <ClInclude Include="RingsProtoCreator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

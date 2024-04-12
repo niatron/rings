@@ -11,6 +11,11 @@ Ptr<Point3D> GetCirclePoint(double radius, double angel)
 	return Point3D::create(radius * cos(angel), radius * sin(angel), 0);
 }
 
+Ptr<Point3D> GetCirclePoint(Ptr<Point3D> circleCenter, double radius, double angel)
+{
+    return Point3D::create(circleCenter->x() + radius * cos(angel), circleCenter->y() + radius * sin(angel), 0);
+}
+
 bool Equal(double a, double b, double delta)
 {
     return abs(a - b) < delta;
@@ -132,6 +137,13 @@ void MessageBox(std::string message)
     Application::get()->userInterface()->messageBox(message);
 }
 
+Ptr<Sketch> CreateSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name)
+{
+    auto sketch = component->sketches()->add(plane);
+    sketch->name(name);
+    return sketch;
+}
+
 Ptr<ConstructionPoint> AddConstructionPoint(Ptr<Component> component, Ptr<Base> point)
 {
     auto input = component->constructionPoints()->createInput();
@@ -154,6 +166,11 @@ Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Point3D>
 Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Vector3D> vector)
 {
     return AddConstructionAxis(component, component->originConstructionPoint()->geometry(), vector);
+}
+
+Ptr<SketchArc> AddCircle(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius)
+{
+    return sketch->sketchCurves()->sketchCircles()->addByCenterRadius(circleCentr, radius);
 }
 
 Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius, double length, double pivotAngelInRadian, bool pivotAngelIsCenterOfArc)

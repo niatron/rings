@@ -181,16 +181,9 @@ bool RingsProtoCreator::createVolfBody(Ptr<Component> component)
     return body;
 }
 
-Ptr<Sketch> RingsProtoCreator::createSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name)
-{
-	auto sketch = component->sketches()->add(plane);
-	sketch->name(name);
-	return sketch;
-}
-
 Ptr<Sketch> RingsProtoCreator::createSketchBase(Ptr<Component> component)
 {
-	Ptr<Sketch> sketch = createSketch(component, component->xYConstructionPlane(), "BaseSketch");
+	Ptr<Sketch> sketch = CreateSketch(component, component->xYConstructionPlane(), "BaseSketch");
 
 	auto outerLength = getBaseOuterLength();
 	auto innerLength = getBaseInnerLength();
@@ -222,7 +215,7 @@ bool RingsProtoCreator::isBaseWallXFloorsOuterEdge(Ptr<BRepEdge> edge)
 Ptr<Sketch> RingsProtoCreator::createSketchCutting(Ptr<Component> component)
 {
     auto params = baseCuttingParams;
-    auto sketch = createSketch(component, component->xYConstructionPlane(), "CuttingSketch");
+    auto sketch = CreateSketch(component, component->xYConstructionPlane(), "CuttingSketch");
 
     auto arc1 = AddArc(sketch, GetCenterPoint(), params.outerRadius, params.outerLength, RAD_90);
     auto arc2 = AddArc(sketch, GetCenterPoint(), params.innerRadius, params.innerLength, RAD_90);
@@ -240,7 +233,7 @@ Ptr<Sketch> RingsProtoCreator::createSketchCutting(Ptr<Component> component)
 
 Ptr<Sketch> RingsProtoCreator::createSketchCuttingFinal(Ptr<Component> component)
 {
-	auto sketch = createSketch(component, component->xYConstructionPlane(), "CuttingFinalSketch");
+	auto sketch = CreateSketch(component, component->xYConstructionPlane(), "CuttingFinalSketch");
 
     auto clearance = clearanceUnmovable;
     auto line1 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(Point3D::create(0, -clearance, 0), Point3D::create(outerRadius, -outerRadius - clearance, 0));
@@ -254,7 +247,7 @@ Ptr<Sketch> RingsProtoCreator::createSketchCuttingFinal(Ptr<Component> component
 
 Ptr<Sketch> RingsProtoCreator::createSketchSquare(Ptr<Component> component, double size)
 {
-    auto sketch = createSketch(component, component->xYConstructionPlane(), "Square");
+    auto sketch = CreateSketch(component, component->xYConstructionPlane(), "Square");
     auto halfSize = size / 2;
     auto line1 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(Point3D::create(halfSize, halfSize), Point3D::create(halfSize, -halfSize));
     auto line2 = sketch->sketchCurves()->sketchLines()->addByTwoPoints(line1->endSketchPoint(), Point3D::create(-halfSize, -halfSize));
@@ -272,7 +265,7 @@ Ptr<BRepBody> RingsProtoCreator::createArcBody(Ptr<Component> component, double 
     auto outerLength = size * outerRadius / radius;
     auto innerLength = size * innerRadius / radius;
 
-    auto sketch = createSketch(component, component->xYConstructionPlane(), "Arc");
+    auto sketch = CreateSketch(component, component->xYConstructionPlane(), "Arc");
 
     auto arc1 = AddArc(sketch, GetCenterPoint(), outerRadius, outerLength, RAD_90);
     auto arc2 = AddArc(sketch, GetCenterPoint(), innerRadius, innerLength, RAD_90);

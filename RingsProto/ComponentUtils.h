@@ -24,6 +24,7 @@ enum CubeFaceType {
 
 Ptr<Point3D> GetCenterPoint();
 Ptr<Point3D> GetCirclePoint(double radius, double angel);
+Ptr<Point3D> GetCirclePoint(Ptr<Point3D> circleCenter, double radius, double angel);
 bool Equal(double a, double b, double delta = 0.001);
 bool Equal(Ptr<Point3D> p1, Ptr<Point3D> p2, double delta = 0.001);
 bool Equal(Ptr<SketchLine> line, Ptr<BRepEdge> edge, double delta = 0.001);
@@ -40,10 +41,13 @@ Ptr<BRepEdge> getJoinedEdge(Ptr<BRepFace> face1, Ptr<BRepFace> face2);
 
 void MessageBox(std::string message);
 
+Ptr<Sketch> CreateSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name);
+
 Ptr<ConstructionPoint> AddConstructionPoint(Ptr<Component> component, Ptr<Base> point);
 Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Point3D> point, Ptr<Vector3D> vector);
 Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Vector3D> vector);
 
+Ptr<SketchArc> AddCircle(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius);
 Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius, double length, double pivotAngelInRadian, bool pivotAngelIsCenterOfArc = true);
 Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, Ptr<Point3D> startPoint, Ptr<Point3D> endPoint);
 Ptr<SketchLine> AddLine(Ptr<Sketch> sketch, Ptr<Base> startPoint, Ptr<Base> endPoint);

@@ -1,12 +1,12 @@
 
 #include <Core/CoreAll.h>
 #include <Fusion/FusionAll.h>
-//#include <CAM/CAMAll.h>
+
 #include "RingsProtoCreator.h"
+#include "Rings2D2Circles.h"
 
 using namespace adsk::core;
 using namespace adsk::fusion;
-//using namespace adsk::cam;
 
 Ptr<Application> app;
 Ptr<UserInterface> ui;
@@ -33,8 +33,24 @@ extern "C" XI_EXPORT bool run(const char* context)
 	}
 	
 	//ui->messageBox("Start");
-	RingsProtoCreator ringsCreator(3.2, 2.4, 12, 0.1, 0.3, 0.3, 0.25);
-	ringsCreator.createBodies(rootComp);
+    
+    Rings2D2Circles rings2D2Circles;
+    rings2D2Circles.createBodies(rootComp);
+
+    /*rings2D2Circles.createSketchRings(rootComp);
+    rings2D2Circles.setVolfCount(9);
+    rings2D2Circles.createSketchRings(rootComp);
+    rings2D2Circles.setCrossVolfCount(3);
+    rings2D2Circles.createSketchRings(rootComp);
+    rings2D2Circles.setVolfCount(11);
+    rings2D2Circles.setCrossVolfCount(4);
+    rings2D2Circles.createSketchRings(rootComp);
+    rings2D2Circles.setCrossVolfCount(5);
+    rings2D2Circles.createSketchRings(rootComp);*/
+
+
+	//RingsProtoCreator ringsCreator(3.2, 2.4, 12, 0.1, 0.3, 0.3, 0.25);
+	//ringsCreator.createBodies(rootComp);
 
 	//ui->messageBox("Ok");
 	

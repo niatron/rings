@@ -4,6 +4,8 @@
     <ClCompile Include="RingsProto.cpp" />
     <ClCompile Include="ComponentUtils.cpp" />
     <ClCompile Include="RingsProtoCreator.cpp" />
+    <ClCompile Include="Rings2D2Circles.cpp" />
+    <ClCompile Include="Geometry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="RingsProto.manifest" />
@@ -11,5 +13,7 @@
   <ItemGroup>
     <ClInclude Include="ComponentUtils.h" />
     <ClInclude Include="RingsProtoCreator.h" />
+    <ClInclude Include="Rings2D2Circles.h" />
+    <ClInclude Include="Geometry.h" />
   </ItemGroup>
 </Project>
