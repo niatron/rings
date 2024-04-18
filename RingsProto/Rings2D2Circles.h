@@ -17,13 +17,17 @@ class Rings2D2Circles
     {
     public:
         double baseOuterRadius;
+        double baseInnerRadius;
     };
     int volfCount = 10;
     int crossVolfCount = 4;
     double volfRadiusWithoutClearance;
     double volfRadius;
+    double volfLegRadius = 0.2;
     double circleRadius = 6;
     double wallThickness = 0.12;
+    double baseWallHeight = 0.42;
+    double magnetRadius = 0.3;
     double floorThickness = 0.12;
     double moovableClearence = 0.04;
     double unmoovableClearence = 0.02;
@@ -40,7 +44,7 @@ private:
     double getCircleShift();
     Ptr<Point3D> getLeftCenterPoint();
     Ptr<Point3D> getRightCenterPoint();
-    Ptr<Sketch> createSketchRings(Ptr<Component> component);
+    Ptr<Sketch> createSketchRings(Ptr<Component> component, double volfRadius);
     Ptr<Sketch> createSketchBase(Ptr<Component> component);
     Ptr<BRepBody> createPairedCircles(Ptr<Component> component, double radiusOut, double thicknes, double height);
 public:

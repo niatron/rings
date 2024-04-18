@@ -221,6 +221,15 @@ Ptr<ExtrudeFeature> Extrude(Ptr<Component> component, Ptr<Sketch> sketch, double
     return Extrude(component, sketch->profiles()->item(0), distance, isSymetric);
 }
 
+Ptr<ObjectCollection> ExtrudeAll(Ptr<Component> component, Ptr<Sketch> sketch, double distance, bool isSymetric)
+{
+    auto collection = ObjectCollection::create();
+    for(int i =0; i< sketch->profiles()->count();i++)
+        collection->add(Extrude(component, sketch->profiles()->item(i), distance, isSymetric));
+    
+    return collection;
+}
+
 Ptr<BRepBody> Move(Ptr<Component> component, Ptr<BRepBody> body, Ptr<ConstructionAxis> axis, double distance, bool createCopy)
 {
     auto moveBody = createCopy ? body->copyToComponent(component) : body;
