@@ -58,16 +58,24 @@ Ptr<Point3D> Rings2D2Circles::getRightCenterPoint()
     return Point3D::create(getCircleShift());
 }
 
-Ptr<Sketch> Rings2D2Circles::createSketchRings(Ptr<Component> component, double volfRadius)
+Ptr<Sketch> Rings2D2Circles::createSketchRings(Ptr<Component> component, double volfRadius, int count)
 {
+    if (count < 0 || count > 2 * volfCount)
+        count = 2 * volfCount;
     auto sketch = CreateSketch(component, component->xYConstructionPlane(), "RingsSketch");
 
     auto leftRotate = crossVolfCount % 2 == 0 ? getVolfSegmentAngelRad() / 2.0 : 0;
     auto rightRotate = crossVolfCount % 2 == volfCount % 2 ? getVolfSegmentAngelRad() / 2.0 : 0;
-    for (int i = 0; i < volfCount; i++)
+    for (int i = 0, k = 0; i < volfCount; i++)
     {
+        if (k == count)
+            break;
         AddCircle(sketch, GetCirclePoint(getLeftCenterPoint(), circleRadius, getVolfSegmentAngelRad() * i + leftRotate), volfRadius);
+        k++;
+        if (k == count)
+            break;
         AddCircle(sketch, GetCirclePoint(getRightCenterPoint(), circleRadius, getVolfSegmentAngelRad() * i + rightRotate), volfRadius);
+        k++;
     }
 
     return sketch;
@@ -106,12 +114,17 @@ Ptr<BRepBody> Rings2D2Circles::createPairedCircles(Ptr<Component> component, dou
 
     return body;
 }
+Ptr<BRepBody> Rings2D2Circles::createVolfCilinderPart(Ptr<Component> component, double radius, double height)
+{
+    auto sketch = createSketchRings(component, radius, 1);
+    return Extrude(component, sketch->profiles()->item(0), height, false)->bodies()->item(0);
+}
 
 void Rings2D2Circles::createBodies(Ptr<Component> component)
 {
     if (leftAxis == nullptr)
         leftAxis = AddConstructionAxis(component, getLeftCenterPoint(), Vector3D::create(0, 0, 1));
-    createSketchRings(component, volfRadius);
+    //createSketchRings(component, volfRadius);
     auto magnetSketch = createSketchRings(component, magnetRadius);
     //createSketchBase(component);
 
@@ -119,15 +132,17 @@ void Rings2D2Circles::createBodies(Ptr<Component> component)
 
     params.baseOuterRadius = circleRadius + volfRadius + wallThickness + moovableClearence;
     params.baseInnerRadius = circleRadius - volfRadius - wallThickness - moovableClearence;
+    params.baseWayHeight = floorThickness * 2.0;
+    params.baseWallHeight = params.baseWayHeight + volfLegThickness + 2.0 * moovableClearence;
 
     auto baseBody = createPairedCircles(component, params.baseInnerRadius, params.baseOuterRadius - params.baseInnerRadius, floorThickness);
-    auto baseOuterWallBody = createPairedCircles(component, params.baseOuterRadius - wallThickness, wallThickness, baseWallHeight);
+    auto baseOuterWallBody = createPairedCircles(component, params.baseOuterRadius - wallThickness, wallThickness, params.baseWallHeight);
     baseBody = Combine(component, JoinFeatureOperation, baseBody, baseOuterWallBody);
-    auto baseInnerWallBody = createPairedCircles(component, params.baseInnerRadius, wallThickness, baseWallHeight);
+    auto baseInnerWallBody = createPairedCircles(component, params.baseInnerRadius, wallThickness, params.baseWallHeight);
     baseBody = Combine(component, JoinFeatureOperation, baseBody, baseInnerWallBody);
-    auto baseWayBody = createPairedCircles(component, params.baseInnerRadius, params.baseOuterRadius - params.baseInnerRadius, floorThickness * 2.0);
+    auto baseWayBody = createPairedCircles(component, params.baseInnerRadius, params.baseOuterRadius - params.baseInnerRadius, params.baseWayHeight);
     baseBody = Combine(component, JoinFeatureOperation, baseBody, baseWayBody);
-    auto cutWayBody = createPairedCircles(component, params.baseInnerRadius + wallThickness, params.baseOuterRadius - params.baseInnerRadius - 2.0 * wallThickness, baseWallHeight);
+    auto cutWayBody = createPairedCircles(component, params.baseInnerRadius + wallThickness, params.baseOuterRadius - params.baseInnerRadius - 2.0 * wallThickness, params.baseWallHeight);
     cutWayBody = Move(component, cutWayBody, leftAxis, floorThickness * 2.0);
     baseBody = Combine(component, CutFeatureOperation, baseBody, cutWayBody);
 
@@ -142,8 +157,8 @@ void Rings2D2Circles::createBodies(Ptr<Component> component)
     auto roofOuterOuterRadius = params.baseOuterRadius + wallThickness + unmoovableClearence;
 
     auto roofOuterBody = createPairedCircles(component, roofOuterInnerRadius, roofOuterOuterRadius - roofOuterInnerRadius, floorThickness);
-    auto roofOuterWallBody = createPairedCircles(component, roofOuterOuterRadius - wallThickness, wallThickness, baseWallHeight + floorThickness);
-    roofOuterBody = Move(component, roofOuterBody, leftAxis, baseWallHeight + unmoovableClearence);
+    auto roofOuterWallBody = createPairedCircles(component, roofOuterOuterRadius - wallThickness, wallThickness, params.baseWallHeight + floorThickness);
+    roofOuterBody = Move(component, roofOuterBody, leftAxis, params.baseWallHeight + unmoovableClearence);
     roofOuterBody = Combine(component, JoinFeatureOperation, roofOuterBody, roofOuterWallBody);
 
 
@@ -151,15 +166,33 @@ void Rings2D2Circles::createBodies(Ptr<Component> component)
     auto roofInnerOuterRadius = circleRadius - volfLegRadius - moovableClearence;
 
     auto roofInnerBody = createPairedCircles(component, roofInnerInnerRadius, roofInnerOuterRadius - roofInnerInnerRadius, floorThickness);
-    auto roofInnerWallBody = createPairedCircles(component, roofInnerInnerRadius, wallThickness, baseWallHeight + floorThickness);
-    roofInnerBody = Move(component, roofInnerBody, leftAxis, baseWallHeight + unmoovableClearence);
+    auto roofInnerWallBody = createPairedCircles(component, roofInnerInnerRadius, wallThickness, params.baseWallHeight + floorThickness);
+    roofInnerBody = Move(component, roofInnerBody, leftAxis, params.baseWallHeight + unmoovableClearence);
     roofInnerBody = Combine(component, JoinFeatureOperation, roofInnerBody, roofInnerWallBody);
 
     auto roofBody = Combine(component, JoinFeatureOperation, roofInnerBody, roofOuterBody);
 
-    auto roofCutWayBody = createPairedCircles(component, roofInnerInnerRadius + wallThickness, roofOuterOuterRadius - roofInnerInnerRadius - 2.0 * wallThickness, baseWallHeight + unmoovableClearence);
-    auto roofClearenceCutWayBody = createPairedCircles(component, roofInnerOuterRadius, roofOuterInnerRadius - roofInnerOuterRadius, baseWallHeight + unmoovableClearence + floorThickness);
+    auto roofCutWayBody = createPairedCircles(component, roofInnerInnerRadius + wallThickness, roofOuterOuterRadius - roofInnerInnerRadius - 2.0 * wallThickness, params.baseWallHeight + unmoovableClearence);
+    auto roofClearenceCutWayBody = createPairedCircles(component, roofInnerOuterRadius, roofOuterInnerRadius - roofInnerOuterRadius, params.baseWallHeight + unmoovableClearence + floorThickness);
     roofCutWayBody = Combine(component, JoinFeatureOperation, roofCutWayBody, roofClearenceCutWayBody);
 
     Combine(component, CutFeatureOperation, roofBody, roofCutWayBody);
+
+
+    auto volfDownBody = createVolfCilinderPart(component, volfRadius, volfLegThickness);
+    volfDownBody = Move(component, volfDownBody, leftAxis, params.baseWayHeight + moovableClearence);
+
+    auto volfLegBody = createVolfCilinderPart(component, volfLegRadius, floorThickness + 2.0 * moovableClearence);
+    volfLegBody = Move(component, volfLegBody, leftAxis, params.baseWayHeight + moovableClearence + volfLegThickness);
+    volfDownBody = Combine(component, JoinFeatureOperation, volfDownBody, volfLegBody);
+    
+    auto volfLegHoleBody = createVolfCilinderPart(component, volfLegHoleRadius, volfLegThickness + floorThickness + 2.0 * moovableClearence);
+    volfLegHoleBody = Move(component, volfLegHoleBody, leftAxis, params.baseWayHeight + moovableClearence);
+    volfDownBody = Combine(component, CutFeatureOperation, volfDownBody, volfLegHoleBody);
+
+
+    auto volfUpBody = createVolfCilinderPart(component, volfRadius, volfHeadThickness);
+    auto volfUpHoleBody = createVolfCilinderPart(component, volfLegHoleRadius + moovableClearence, volfHeadThickness);
+    volfUpBody = Combine(component, CutFeatureOperation, volfUpBody, volfUpHoleBody);
+    volfUpBody = Move(component, volfUpBody, leftAxis, params.baseWallHeight + unmoovableClearence + floorThickness + moovableClearence);
 }

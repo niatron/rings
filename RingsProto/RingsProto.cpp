@@ -35,6 +35,10 @@ extern "C" XI_EXPORT bool run(const char* context)
 	//ui->messageBox("Start");
     
     Rings2D2Circles rings2D2Circles;
+    rings2D2Circles.circleRadius = 2.5;
+    rings2D2Circles.magnetRadius = 0.25;
+    rings2D2Circles.volfLegRadius = 0.25;
+    rings2D2Circles.Recount();
     rings2D2Circles.createBodies(rootComp);
 
     /*rings2D2Circles.createSketchRings(rootComp);
