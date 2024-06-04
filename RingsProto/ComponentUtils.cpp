@@ -137,12 +137,50 @@ void MessageBox(std::string message)
     Application::get()->userInterface()->messageBox(message);
 }
 
+void addToObjectCollection(Ptr<ObjectCollection> objectCollection, std::initializer_list<Ptr<Base>> items)
+{
+    for (auto item : items)
+        objectCollection->add(item);
+}
+
+Ptr<ObjectCollection> createObjectCollection(std::initializer_list<Ptr<Base>> items)
+{
+    auto collection = ObjectCollection::create();
+    addToObjectCollection(collection, items);
+    return collection;
+}
+
+
 Ptr<Sketch> CreateSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name)
 {
     auto sketch = component->sketches()->add(plane);
     sketch->name(name);
     return sketch;
 }
+
+
+void Rotate(Ptr<Sketch> sketch, double angel, Ptr<Point3D> point, Ptr<ObjectCollection> items)
+{
+    auto normal = sketch->xDirection()->crossProduct(sketch->yDirection());
+    auto matrix = Matrix3D::create();
+    matrix->setToRotation(angel, normal, point);
+    sketch->move(items, matrix);
+}
+
+void Rotate(Ptr<Sketch> sketch, double angel, Ptr<Point3D> point, std::initializer_list<Ptr<Base>> items)
+{
+    Rotate(sketch, angel, point, createObjectCollection(items));
+}
+
+void Rotate(Ptr<Sketch> sketch, double angel, Ptr<Point3D> point)
+{
+    auto items = ObjectCollection::create();
+    auto curves = sketch->sketchCurves();
+    for (int i = 0; i < curves->count(); i++)
+        items->add(curves->item(i));
+    Rotate(sketch, angel, point, items);
+}
+
 
 Ptr<ConstructionPoint> AddConstructionPoint(Ptr<Component> component, Ptr<Base> point)
 {

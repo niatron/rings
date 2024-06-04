@@ -6,6 +6,7 @@
 #include <functional>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <initializer_list>
 
 using namespace adsk::core;
 using namespace adsk::fusion;
@@ -41,7 +42,14 @@ Ptr<BRepEdge> getJoinedEdge(Ptr<BRepFace> face1, Ptr<BRepFace> face2);
 
 void MessageBox(std::string message);
 
+void addToObjectCollection(Ptr<ObjectCollection> objectCollection, std::initializer_list<Ptr<Base>> items);
+Ptr<ObjectCollection> createObjectCollection(std::initializer_list<Ptr<Base>> items);
+
 Ptr<Sketch> CreateSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane, std::string name);
+
+void Rotate(Ptr<Sketch> sketch, double angel, Ptr<Point3D> point, Ptr<ObjectCollection> items);
+void Rotate(Ptr<Sketch> sketch, double angel, Ptr<Point3D> point, std::initializer_list<Ptr<Base>> items);
+void Rotate(Ptr<Sketch> sketch, double angel, Ptr<Point3D> point);
 
 Ptr<ConstructionPoint> AddConstructionPoint(Ptr<Component> component, Ptr<Base> point);
 Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Point3D> point, Ptr<Vector3D> vector);
