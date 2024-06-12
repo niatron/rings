@@ -55,7 +55,7 @@ Ptr<ConstructionPoint> AddConstructionPoint(Ptr<Component> component, Ptr<Base> 
 Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Point3D> point, Ptr<Vector3D> vector);
 Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Vector3D> vector);
 
-Ptr<SketchArc> AddCircle(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius);
+Ptr<SketchCircle> AddCircle(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius);
 Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius, double length, double pivotAngelInRadian, bool pivotAngelIsCenterOfArc = true);
 Ptr<SketchArc> AddArc(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, Ptr<Point3D> startPoint, Ptr<Point3D> endPoint);
 Ptr<SketchLine> AddLine(Ptr<Sketch> sketch, Ptr<Base> startPoint, Ptr<Base> endPoint);
@@ -76,6 +76,8 @@ Ptr<ObjectCollection> GetEdges(Ptr<BRepBody> body, std::function <bool(Ptr<BRepE
 Ptr<ObjectCollection> GetEdges(std::vector<Ptr<BRepFace>> joinedFaces, std::vector<Ptr<BRepFace>> unjoinedFaces);
 
 Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis);
+
+Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, double radius, double height);
 
 //template <typename T> std::vector<T> Where(std::vector<T> collection, std::function <bool(T)> isGoodItem);
 //template <class T> std::vector<Ptr<T>> ToVector(Ptr<ObjectCollection> collection);

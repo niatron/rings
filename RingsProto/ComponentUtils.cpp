@@ -206,7 +206,7 @@ Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Vector3D
     return AddConstructionAxis(component, component->originConstructionPoint()->geometry(), vector);
 }
 
-Ptr<SketchArc> AddCircle(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius)
+Ptr<SketchCircle> AddCircle(Ptr<Sketch> sketch, Ptr<Point3D> circleCentr, double radius)
 {
     return sketch->sketchCurves()->sketchCircles()->addByCenterRadius(circleCentr, radius);
 }
@@ -367,3 +367,10 @@ Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis)
 	return vector;
 }
 
+
+Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, double radius, double height)
+{
+    auto sketch = CreateSketch(component, component->xYConstructionPlane(), "CilinderSketch");
+    AddCircle(sketch, center, radius);
+    return Extrude(component, sketch->profiles()->item(0), height)->bodies()->item(0);
+}

@@ -29,15 +29,14 @@ public:
     double volfLegThickness = 0.2;
     double volfLegHoleRadius = 0.14;
     double volfHeadThickness = 0.2;
-    double squareSize = 7;
+    double squareMiddleSize = 5; //length bitween centers of paralel line ways
     double wallThickness = 0.12;
-    double magnetRadius = 0.3;
+    double magnetRadius = 0.25;
     double floorThickness = 0.2;
     double moovableClearence = 0.04;
     double unmoovableClearence = 0.02;
+    double verticalEdgeFilletRadius = 0.1;
 private:
-    double volfRadiusWithoutClearance;
-    double volfRadius;
     Ptr<ConstructionAxis> leftAxis = nullptr;
     Ptr<ConstructionAxis> rightAxis = nullptr;
 
@@ -47,7 +46,7 @@ private:
     double getVolfSegmentAngelRad();
     double getVolfRadius();
     double getLineLength();
-    double getCornerlHeight();
+    double getCornerOuterRadius();
     double getSquareShift();
     Ptr<Point3D> getLeftCenterPoint();
     Ptr<Point3D> getRightCenterPoint();
