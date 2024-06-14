@@ -367,6 +367,19 @@ Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis)
 	return vector;
 }
 
+Ptr<BRepBody> CreateSphere(Ptr<Component> component, Ptr<Point3D> center, double radius)
+{
+    auto sketch = CreateSketch(component, component->xYConstructionPlane(), "SphereSketch");
+    auto startPoint = Point3D::create(-radius);
+    auto endPoint = Point3D::create(radius);
+    AddArc(sketch, Point3D::create(), startPoint, endPoint);
+    AddLine(sketch, startPoint, endPoint);
+    auto body = Revolve(component, sketch, component->xConstructionAxis(), RAD_360)->bodies()->item(0);
+    body = Move(component, body, component->xConstructionAxis(), center->x());
+    body = Move(component, body, component->yConstructionAxis(), center->y());
+    body = Move(component, body, component->zConstructionAxis(), center->z());
+    return body;
+}
 
 Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, double radius, double height)
 {

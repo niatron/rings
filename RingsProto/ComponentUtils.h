@@ -12,7 +12,14 @@ using namespace adsk::core;
 using namespace adsk::fusion;
 //using namespace adsk::cam;
 
-#define RAD_90 M_PI / 2.0
+#define RAD_90  M_PI * 0.5
+#define RAD_180 M_PI * 1.0
+#define RAD_360 M_PI * 2.0
+
+#define PLA_MOOVABLE_CLEARNCE 0.04
+#define PLA_UNMOOVABLE_CLEARNCE 0.02
+#define ABS_MOOVABLE_CLEARNCE 0.02
+#define ABS_UNMOOVABLE_CLEARNCE 0.01
 
 enum CubeFaceType {
     Top,
@@ -77,6 +84,7 @@ Ptr<ObjectCollection> GetEdges(std::vector<Ptr<BRepFace>> joinedFaces, std::vect
 
 Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis);
 
+Ptr<BRepBody> CreateSphere(Ptr<Component> component, Ptr<Point3D> center, double radius);
 Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, double radius, double height);
 
 //template <typename T> std::vector<T> Where(std::vector<T> collection, std::function <bool(T)> isGoodItem);

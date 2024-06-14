@@ -3,6 +3,8 @@
 #include <Core/CoreAll.h>
 #include <Fusion/FusionAll.h>
 
+#include "ComponentUtils.h"
+
 using namespace adsk::core;
 using namespace adsk::fusion;
 
@@ -22,20 +24,60 @@ class Rings2D2Squares
         double baseWallHeight;
     };
 
+    class VolfDownParams
+    {
+    public:
+        double radius;
+        double height;
+        double middleRadius = 0;
+        double middleHeight = 0;
+        double holeRadius = 0;
+        double holeHeight = 0;
+        double holeUpRadius = 0;
+        double holeUpHeight = 0;
+        double holeDownRadius = 0;
+        double holeDownHeight = 0;
+        Ptr<Point3D> centerPoint;
+        double zMoveShift = 0;
+
+        Ptr<BRepBody> createBody(Ptr<Component> component);
+    };
+
+    class VolfUpParams
+    {
+    public:
+        double radius;
+        double height;
+        double middleRadius = 0;
+        double middleHeight = 0;
+        double holeRadius = 0;
+        double holeHeight = 0;
+        double holeUpRadius = 0;
+        double holeUpHeight = 0;
+        double holeDownRadius = 0;
+        double holeDownHeight = 0;
+        double cuttedSphreCuttingHeight = 0;
+        double cuttedSphreRadius = 0;
+        Ptr<Point3D> centerPoint;
+        double zMoveShift = 0;
+
+        Ptr<BRepBody> createBody(Ptr<Component> component);
+    };
+
 public:
     double lineVolfCount = 1;
     double cornerVolfCount = 2;
     double volfLegRadius = 0.3;
-    double volfLegThickness = 0.2;
+    double volfLegThickness = 0.5;
     double volfLegHoleRadius = 0.14;
     double volfHeadThickness = 0.2;
     double squareMiddleSize = 5; //length bitween centers of paralel line ways
-    double wallThickness = 0.12;
+    double wallThickness = 0.16;
     double magnetRadius = 0.25;
     double floorThickness = 0.2;
-    double moovableClearence = 0.04;
-    double unmoovableClearence = 0.02;
-    double verticalEdgeFilletRadius = 0.1;
+    double moovableClearence = ABS_MOOVABLE_CLEARNCE;
+    double unmoovableClearence = ABS_UNMOOVABLE_CLEARNCE;
+    double verticalEdgeFilletRadius = 0.12;
 private:
     Ptr<ConstructionAxis> leftAxis = nullptr;
     Ptr<ConstructionAxis> rightAxis = nullptr;
@@ -43,18 +85,19 @@ private:
 public:
     Rings2D2Squares();
 private:
-    double getVolfSegmentAngelRad();
     double getVolfRadius();
     double getLineLength();
     double getCornerOuterRadius();
     double getSquareShift();
+    
     Ptr<Point3D> getLeftCenterPoint();
     Ptr<Point3D> getRightCenterPoint();
+    
     Ptr<Sketch> createSketchRings(Ptr<Component> component, double volfRadius, int count = -1);
-    Ptr<Sketch> createSketchBase(Ptr<Component> component);
-    Ptr<BRepBody> createSector(Ptr<Component> component, Ptr<Point3D> centerPoint, double radius, double angel, double startAngel, double height);
+    
     Ptr<BRepBody> createPairedSquares(Ptr<Component> component, double size, double cornerHeightOuter, double rotateAngel, double thickness, double height);
-    Ptr<BRepBody> createVolfCilinderPart(Ptr<Component> component, double radius, double height);
+    
+    Ptr<BRepBody> createVolfDownBody(Ptr<Component> component, VolfDownParams volfDownParams);
 public:
     void createBodies(Ptr<Component> component);
 };
