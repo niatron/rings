@@ -1,9 +1,8 @@
 #pragma once
 
-#include <Core/CoreAll.h>
-#include <Fusion/FusionAll.h>
-
-#include "ComponentUtils.h"
+#include "FusionEnvironment.h"
+#include "VolfDownPart.h"
+#include "VolfUpPart.h"
 
 using namespace adsk::core;
 using namespace adsk::fusion;
@@ -19,46 +18,6 @@ class Rings2D2Squares
         double baseInnerRadius;
         double baseWayHeight;
         double baseWallHeight;
-    };
-
-    class VolfDownParams
-    {
-    public:
-        double radius;
-        double height;
-        double middleRadius = 0;
-        double middleHeight = 0;
-        double holeRadius = 0;
-        double holeHeight = 0;
-        double holeUpRadius = 0;
-        double holeUpHeight = 0;
-        double holeDownRadius = 0;
-        double holeDownHeight = 0;
-        Ptr<Point3D> centerPoint;
-        double zMoveShift = 0;
-
-        Ptr<BRepBody> createBody(Ptr<Component> component);
-    };
-
-    class VolfUpParams
-    {
-    public:
-        double radius;
-        double height;
-        double middleRadius = 0;
-        double middleHeight = 0;
-        double holeRadius = 0;
-        double holeHeight = 0;
-        double holeUpRadius = 0;
-        double holeUpHeight = 0;
-        double holeDownRadius = 0;
-        double holeDownHeight = 0;
-        double cuttedSphreCuttingHeight = 0;
-        double cuttedSphreRadius = 0;
-        Ptr<Point3D> centerPoint;
-        double zMoveShift = 0;
-
-        Ptr<BRepBody> createBody(Ptr<Component> component);
     };
 
 public:
@@ -95,7 +54,7 @@ private:
     
     Ptr<BRepBody> createPairedSquares(Ptr<Component> component, double size, double cornerHeightOuter, double rotateAngel, double thickness, double height);
     
-    Ptr<BRepBody> createVolfDownBody(Ptr<Component> component, VolfDownParams volfDownParams);
+    Ptr<BRepBody> createVolfDownBody(Ptr<Component> component, VolfDownPart volfDownPart);
 public:
     void createBodies(Ptr<Component> component);
 };

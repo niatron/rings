@@ -1,6 +1,6 @@
 #include "Rings2D2Squares.h"
 #include "Geometry.h"
-#include "ComponentUtils.h"
+#include "FusionEnvironment.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -137,80 +137,6 @@ Ptr<Sketch> Rings2D2Squares::createSketchRings(Ptr<Component> component, double 
     return leftSketch;
 }
 
-Ptr<BRepBody> Rings2D2Squares::VolfDownParams::createBody(Ptr<Component> component)
-{
-    auto body = CreateCylinder(component, centerPoint, radius, height);
-
-    if (middleRadius > 0 && middleHeight > 0)
-    {
-        auto middleBody = CreateCylinder(component, centerPoint, middleRadius, middleHeight);
-        middleBody = Move(component, middleBody, component->zConstructionAxis(), height);
-        body = Combine(component, JoinFeatureOperation, body, middleBody);
-    }
-
-    if (holeRadius > 0 && holeHeight > 0)
-    {
-        auto holeBody = CreateCylinder(component, centerPoint, holeRadius, holeHeight);
-        body = Combine(component, CutFeatureOperation, body, holeBody);
-    }
-
-    if (holeDownRadius > 0 && holeDownHeight > 0)
-    {
-        auto holeBody = CreateCylinder(component, centerPoint, holeDownRadius, holeDownHeight);
-        body = Combine(component, CutFeatureOperation, body, holeBody);
-    }
-
-    if (holeUpRadius > 0 && holeUpHeight > 0)
-    {
-        auto holeBody = CreateCylinder(component, centerPoint, holeUpRadius, holeUpHeight);
-        holeBody = Move(component, holeBody, component->zConstructionAxis(), height + middleHeight - holeUpHeight);
-        body = Combine(component, CutFeatureOperation, body, holeBody);
-    }
-    body = Move(component, body, component->zConstructionAxis(), zMoveShift);
-    return body;
-}
-
-Ptr<BRepBody> Rings2D2Squares::VolfUpParams::createBody(Ptr<Component> component)
-{
-    auto body = CreateCylinder(component, centerPoint, radius, height);
-
-    if (middleRadius > 0 && middleHeight > 0)
-    {
-        auto middleBody = CreateCylinder(component, centerPoint, middleRadius, middleHeight);
-        body = Move(component, body, component->zConstructionAxis(), middleHeight);
-        body = Combine(component, JoinFeatureOperation, body, middleBody);
-    }
-
-    if (holeRadius > 0 && holeHeight > 0)
-    {
-        auto holeBody = CreateCylinder(component, centerPoint, holeRadius, holeHeight);
-        body = Combine(component, CutFeatureOperation, body, holeBody);
-    }
-
-    if (holeDownRadius > 0 && holeDownHeight > 0)
-    {
-        auto holeBody = CreateCylinder(component, centerPoint, holeDownRadius, holeDownHeight);
-        body = Combine(component, CutFeatureOperation, body, holeBody);
-    }
-
-    if (holeUpRadius > 0 && holeUpHeight > 0)
-    {
-        auto holeBody = CreateCylinder(component, centerPoint, holeUpRadius, holeUpHeight);
-        holeBody = Move(component, holeBody, component->zConstructionAxis(), height + middleHeight - holeUpHeight);
-        body = Combine(component, CutFeatureOperation, body, holeBody);
-    }
-
-    if (cuttedSphreRadius > 0 && cuttedSphreCuttingHeight > 0)
-    {
-        auto sphereBody = CreateSphere(component, Point3D::create(centerPoint->x(), centerPoint->y(), height + middleHeight + cuttedSphreRadius - cuttedSphreCuttingHeight), cuttedSphreRadius);
-        body = Combine(component, CutFeatureOperation, body, sphereBody);
-    }
-
-    body = Move(component, body, component->zConstructionAxis(), zMoveShift - middleHeight);
-    return body;
-}
-
-
 
 void Rings2D2Squares::createBodies(Ptr<Component> component)
 {
@@ -301,31 +227,31 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
         auto volfRadius = getVolfRadius() - moovableClearence / (cornerVolfCount * 4.0 + lineVolfCount * 4.0);
         auto volfCenter = volfsSketch->sketchCurves()->sketchCircles()->item(i)->centerSketchPoint()->geometry();
 
-        VolfDownParams volfDownParams;
-        volfDownParams.centerPoint = volfCenter;
-        volfDownParams.radius = volfRadius;
-        volfDownParams.height = volfLegThickness;
-        volfDownParams.holeDownRadius = 0.36;
-        volfDownParams.holeDownHeight = 0.30;
-        volfDownParams.holeRadius = volfLegHoleRadius * 1.2;
-        volfDownParams.holeHeight = volfLegThickness;
-        volfDownParams.zMoveShift = params_baseWayHeight + moovableClearence;
-        volfDownBody = volfDownParams.createBody(component);
+        VolfDownPart volfDownPart;
+        volfDownPart.centerPoint = volfCenter;
+        volfDownPart.radius = volfRadius;
+        volfDownPart.height = volfLegThickness;
+        volfDownPart.holeDownRadius = 0.36;
+        volfDownPart.holeDownHeight = 0.30;
+        volfDownPart.holeRadius = volfLegHoleRadius * 1.2;
+        volfDownPart.holeHeight = volfLegThickness;
+        volfDownPart.zMoveShift = params_baseWayHeight + moovableClearence;
+        volfDownBody = volfDownPart.createBody(component);
 
         //if (i > 0)
         //    continue;
-        VolfUpParams volfUpParams;
-        volfUpParams.centerPoint = volfCenter;
-        volfUpParams.radius = volfRadius;
-        volfUpParams.height = volfHeadThickness;
-        volfUpParams.middleRadius = volfLegRadius;
-        volfUpParams.middleHeight = floorThickness + moovableClearence * 3.0;
-        volfUpParams.holeRadius = volfLegHoleRadius;
-        volfUpParams.holeHeight = volfUpParams.middleHeight + volfUpParams.height;
-        volfUpParams.cuttedSphreRadius = volfRadius * 3.0;
-        volfUpParams.cuttedSphreCuttingHeight = 0.15;
-        volfUpParams.zMoveShift = params_baseWallHeight + unmoovableClearence + floorThickness + moovableClearence;
-        volfUpBody = volfUpParams.createBody(component);
+        VolfUpPart volfUpPart;
+        volfUpPart.centerPoint = volfCenter;
+        volfUpPart.radius = volfRadius;
+        volfUpPart.height = volfHeadThickness;
+        volfUpPart.middleRadius = volfLegRadius;
+        volfUpPart.middleHeight = floorThickness + moovableClearence * 3.0;
+        volfUpPart.holeRadius = volfLegHoleRadius;
+        volfUpPart.holeHeight = volfUpPart.middleHeight + volfUpPart.height;
+        volfUpPart.cuttedSphreRadius = volfRadius * 3.0;
+        volfUpPart.cuttedSphreCuttingHeight = 0.15;
+        volfUpPart.zMoveShift = params_baseWallHeight + unmoovableClearence + floorThickness + moovableClearence;
+        volfUpBody = volfUpPart.createBody(component);
         //volfUpBody->isLightBulbOn(false);
         
     }

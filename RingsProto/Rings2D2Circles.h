@@ -6,9 +6,6 @@
 using namespace adsk::core;
 using namespace adsk::fusion;
 
-#define RAD_90 M_PI / 2.0
-#define RAD_180 M_PI
-#define RAD_360 M_PI * 2.0
 #define RAD_144 M_PI * 0.8
 
 class Rings2D2Circles

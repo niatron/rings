@@ -1,5 +1,5 @@
 #include "RingsProtoCreator.h"
-#include "ComponentUtils.h"
+#include "FusionEnvironment.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>

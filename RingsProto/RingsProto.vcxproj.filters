@@ -2,20 +2,37 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="RingsProto.cpp" />
-    <ClCompile Include="ComponentUtils.cpp" />
     <ClCompile Include="RingsProtoCreator.cpp" />
     <ClCompile Include="Rings2D2Circles.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Rings2D2Squares.cpp" />
+    <ClCompile Include="FusionEnvironment.cpp" />
+    <ClCompile Include="VolfDownPart.cpp">
+      <Filter>Rings2DSquares</Filter>
+    </ClCompile>
+    <ClCompile Include="VolfUpPart.cpp">
+      <Filter>Rings2DSquares</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="RingsProto.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ComponentUtils.h" />
     <ClInclude Include="RingsProtoCreator.h" />
     <ClInclude Include="Rings2D2Circles.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Rings2D2Squares.h" />
+    <ClInclude Include="FusionEnvironment.h" />
+    <ClInclude Include="VolfDownPart.h">
+      <Filter>Rings2DSquares</Filter>
+    </ClInclude>
+    <ClInclude Include="VolfUpPart.h">
+      <Filter>Rings2DSquares</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Rings2DSquares">
+      <UniqueIdentifier>{fffea5c0-9426-4013-a99d-2162f08a7eb0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

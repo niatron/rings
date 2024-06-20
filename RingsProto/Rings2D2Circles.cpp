@@ -1,6 +1,6 @@
 #include "Rings2D2Circles.h"
 #include "Geometry.h"
-#include "ComponentUtils.h"
+#include "FusionEnvironment.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
