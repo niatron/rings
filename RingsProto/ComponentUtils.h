@@ -32,7 +32,7 @@ enum CubeFaceType {
 
 Ptr<Point3D> GetCenterPoint();
 Ptr<Point3D> GetCirclePoint(double radius, double angel);
-Ptr<Point3D> GetCirclePoint(Ptr<Point3D> circleCenter, double radius, double angel);
+Ptr<Point3D> GetCirclePoint(Ptr<Point3D> circleCenter, double radius, double angel, bool saveZ = false);
 bool Equal(double a, double b, double delta = 0.001);
 bool Equal(Ptr<Point3D> p1, Ptr<Point3D> p2, double delta = 0.001);
 bool Equal(Ptr<SketchLine> line, Ptr<BRepEdge> edge, double delta = 0.001);
@@ -86,6 +86,8 @@ Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis);
 
 Ptr<BRepBody> CreateSphere(Ptr<Component> component, Ptr<Point3D> center, double radius);
 Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, double radius, double height);
+
+void SaveAsStl(Ptr<BRepBody> body, std::string filepath);
 
 //template <typename T> std::vector<T> Where(std::vector<T> collection, std::function <bool(T)> isGoodItem);
 //template <class T> std::vector<Ptr<T>> ToVector(Ptr<ObjectCollection> collection);

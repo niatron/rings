@@ -223,7 +223,7 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
     auto volfsSketch = createSketchRings(component, getVolfRadius(), 0);
     volfsSketch->isLightBulbOn(false);
 
-    //---------------- bas body ---------------
+    //---------------- base body ---------------
     auto lineLength = getLineLength();
     auto volfDiameter = getVolfRadius() * 2.0;
     auto params_baseOuterRadius = getCornerOuterRadius() + wallThickness + moovableClearence * 0.5;
@@ -262,9 +262,40 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
     roofCutWayBody = Combine(component, JoinFeatureOperation, roofCutWayBody, roofSubstrateBody);
 
     Combine(component, CutFeatureOperation, roofBody, roofCutWayBody);
+    
+    Ptr<BRepBody> roofMainBody;
+    Ptr<BRepBody> roofSideBody;
+    Ptr<BRepBody> roofCenterBody;
+    auto smallShift = 0.01;
+    auto leftCenterPoint = getLeftCenterPoint();
+    auto outerRoofDistance = lineLength / 2.0 + roofOuterOuterRadius;
+    auto innerRoofDistance = lineLength / 2.0 + roofInnerInnerRadius;
+    leftCenterPoint->z(roofFullHeight - smallShift);
+    for (int i = 0; i < component->bRepBodies()->count(); i++)
+    {
+        
+        auto body = component->bRepBodies()->item(i);
+        if (body->pointContainment(Point3D::create(0, 0, roofFullHeight - smallShift)) == PointInsidePointContainment)
+        {
+            body->name("roofCenterBody");
+            roofCenterBody = body;
+        }
+        else if (body->pointContainment(GetCirclePoint(leftCenterPoint, outerRoofDistance - smallShift, RAD_90 + RAD_45, true)) == PointInsidePointContainment)
+        {
+            body->name("roofMainBody");
+            roofMainBody = body;
+        }
+        else if (body->pointContainment(GetCirclePoint(leftCenterPoint, innerRoofDistance + smallShift, RAD_90 + RAD_45, true)) == PointInsidePointContainment)
+        {
+            body->name("roofSideBody");
+            roofSideBody = body;
+        }
+
+    }
 
     //---------------- volf ---------------
-
+    Ptr<BRepBody> volfDownBody;
+    Ptr<BRepBody> volfUpBody;
     for (int i = 0; i < volfsSketch->sketchCurves()->sketchCircles()->count() && i < 2; i++)
     {
         auto volfRadius = getVolfRadius() - moovableClearence / (cornerVolfCount * 4.0 + lineVolfCount * 4.0);
@@ -279,32 +310,46 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
         volfDownParams.holeRadius = volfLegHoleRadius * 1.2;
         volfDownParams.holeHeight = volfLegThickness;
         volfDownParams.zMoveShift = params_baseWayHeight + moovableClearence;
-        volfDownParams.createBody(component);
+        volfDownBody = volfDownParams.createBody(component);
 
         //if (i > 0)
         //    continue;
         VolfUpParams volfUpParams;
         volfUpParams.centerPoint = volfCenter;
         volfUpParams.radius = volfRadius;
-        volfUpParams.height = volfLegThickness;
+        volfUpParams.height = volfHeadThickness;
         volfUpParams.middleRadius = volfLegRadius;
-        volfUpParams.middleHeight = floorThickness + moovableClearence;
+        volfUpParams.middleHeight = floorThickness + moovableClearence * 3.0;
         volfUpParams.holeRadius = volfLegHoleRadius;
-        volfUpParams.holeHeight = volfUpParams.middleHeight + volfUpParams.height - 0.2;
+        volfUpParams.holeHeight = volfUpParams.middleHeight + volfUpParams.height;
         volfUpParams.cuttedSphreRadius = volfRadius * 3.0;
         volfUpParams.cuttedSphreCuttingHeight = 0.15;
         volfUpParams.zMoveShift = params_baseWallHeight + unmoovableClearence + floorThickness + moovableClearence;
-        auto volfUpBody = volfUpParams.createBody(component);
-        volfUpBody->isLightBulbOn(false);
+        volfUpBody = volfUpParams.createBody(component);
+        //volfUpBody->isLightBulbOn(false);
+        
     }
 
     //---------------- filleting ---------------
     for (int i = 0; i < component->bRepBodies()->count(); i++)
     {
         auto body = component->bRepBodies()->item(i);
+        
+        //auto edges0 = GetEdges(body, [=](Ptr<BRepEdge> edge) {return Equal(abs(edge->startVertex()->geometry()->z() - edge->endVertex()->geometry()->z()), edge->length(), 0.01) && abs(edge->endVertex()->geometry()->x()) <= 0.01 && abs(edge->endVertex()->geometry()->y()) < getVolfRadius() && !edge->isDegenerate(); });
+        //Fillet(component, edges0, verticalEdgeFilletRadius / 2.0);
+        
         auto edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return Equal(abs(edge->startVertex()->geometry()->z() - edge->endVertex()->geometry()->z()), edge->length(), 0.01) && !edge->isDegenerate(); });
         Fillet(component, edges, verticalEdgeFilletRadius);
+        
         auto edges2 = GetEdges(body, [=](Ptr<BRepEdge> edge) {return Equal(abs(edge->startVertex()->geometry()->z() - edge->endVertex()->geometry()->z()), 0, 0.01) && !edge->isDegenerate(); });
-        Fillet(component, edges2, verticalEdgeFilletRadius / 2.0);
+        Fillet(component, edges2, horizontalEdgeFilletRadius);
     }
+
+    SaveAsStl(baseBody, "D:\\ServerTechnology\\RingsModels\\2DS12v3\\BaseBody.stl");
+    SaveAsStl(roofMainBody, "D:\\ServerTechnology\\RingsModels\\2DS12v3\\RoofMainBody.stl");
+    SaveAsStl(roofSideBody, "D:\\ServerTechnology\\RingsModels\\2DS12v3\\RoofSideBody.stl");
+    SaveAsStl(roofCenterBody, "D:\\ServerTechnology\\RingsModels\\2DS12v3\\RoofCenterBody.stl");
+    SaveAsStl(volfUpBody, "D:\\ServerTechnology\\RingsModels\\2DS12v3\\VolfUpBody.stl");
+    SaveAsStl(volfDownBody, "D:\\ServerTechnology\\RingsModels\\2DS12v3\\VolfDownBody.stl");
+
 }

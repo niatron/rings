@@ -11,9 +11,9 @@ Ptr<Point3D> GetCirclePoint(double radius, double angel)
 	return Point3D::create(radius * cos(angel), radius * sin(angel), 0);
 }
 
-Ptr<Point3D> GetCirclePoint(Ptr<Point3D> circleCenter, double radius, double angel)
+Ptr<Point3D> GetCirclePoint(Ptr<Point3D> circleCenter, double radius, double angel, bool saveZ)
 {
-    return Point3D::create(circleCenter->x() + radius * cos(angel), circleCenter->y() + radius * sin(angel), 0);
+    return Point3D::create(circleCenter->x() + radius * cos(angel), circleCenter->y() + radius * sin(angel), saveZ ? circleCenter->z() : 0);
 }
 
 bool Equal(double a, double b, double delta)
@@ -386,4 +386,12 @@ Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, doub
     auto sketch = CreateSketch(component, component->xYConstructionPlane(), "CilinderSketch");
     AddCircle(sketch, center, radius);
     return Extrude(component, sketch->profiles()->item(0), height)->bodies()->item(0);
+}
+
+void SaveAsStl(Ptr<BRepBody> body, std::string filepath)
+{
+    auto exportManager = body->parentComponent()->parentDesign()->exportManager();
+    auto stlOptions = exportManager->createSTLExportOptions(body, filepath);
+    stlOptions->meshRefinement(MeshRefinementSettings::MeshRefinementHigh);
+    exportManager->execute(stlOptions);
 }

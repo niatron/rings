@@ -8,9 +8,6 @@
 using namespace adsk::core;
 using namespace adsk::fusion;
 
-#define RAD_90 M_PI / 2.0
-#define RAD_180 M_PI
-#define RAD_360 M_PI * 2.0
 #define RAD_45 M_PI / 4.0
 
 class Rings2D2Squares
@@ -70,14 +67,15 @@ public:
     double volfLegRadius = 0.3;
     double volfLegThickness = 0.5;
     double volfLegHoleRadius = 0.14;
-    double volfHeadThickness = 0.2;
+    double volfHeadThickness = 0.5;
     double squareMiddleSize = 5; //length bitween centers of paralel line ways
     double wallThickness = 0.16;
     double magnetRadius = 0.25;
-    double floorThickness = 0.2;
+    double floorThickness = 0.3;
     double moovableClearence = ABS_MOOVABLE_CLEARNCE;
     double unmoovableClearence = ABS_UNMOOVABLE_CLEARNCE;
     double verticalEdgeFilletRadius = 0.12;
+    double horizontalEdgeFilletRadius = 0.08;
 private:
     Ptr<ConstructionAxis> leftAxis = nullptr;
     Ptr<ConstructionAxis> rightAxis = nullptr;
