@@ -92,6 +92,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BasePart.cpp" />
     <ClCompile Include="FusionEnvironment.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Rings2D2Circles.cpp" />
@@ -111,6 +112,7 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BasePart.h" />
     <ClInclude Include="FusionEnvironment.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Rings2D2Circles.h" />

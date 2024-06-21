@@ -332,6 +332,20 @@ Ptr<ObjectCollection> GetEdges(Ptr<BRepBody> body, std::function <bool(Ptr<BRepE
 	return collection;
 }
 
+Ptr<ObjectCollection> GetEdges(Ptr<ObjectCollection> edges, std::function <bool(Ptr<BRepEdge>)> isGoodEdge)
+{
+    auto collection = ObjectCollection::create();
+    
+    for (int i = 0; i < edges->count(); i++)
+    {
+        auto edge = edges->item(i);
+
+        if (isGoodEdge(edge))
+            collection->add(edge);
+    }
+    return collection;
+}
+
 Ptr<ObjectCollection> GetEdges(std::vector<Ptr<BRepFace>> joinedFaces, std::vector<Ptr<BRepFace>> unjoinedFaces)
 {
     auto collection = ObjectCollection::create();
@@ -357,6 +371,19 @@ Ptr<ObjectCollection> GetEdges(std::vector<Ptr<BRepFace>> joinedFaces, std::vect
         }
     }
     return collection;
+}
+
+double GetMin(Ptr<ObjectCollection> items, std::function <double(Ptr<Base>)> getValue)
+{
+    double result = INT32_MAX;
+    for (int i = 0; i < items->count(); i++)
+    {
+        auto value = getValue(items->item(i));
+
+        if (result > value)
+            result = value;
+    }
+    return result;
 }
 
 Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis)
@@ -386,6 +413,16 @@ Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, doub
     auto sketch = CreateSketch(component, component->xYConstructionPlane(), "CilinderSketch");
     AddCircle(sketch, center, radius);
     return Extrude(component, sketch->profiles()->item(0), height)->bodies()->item(0);
+}
+
+bool EdgeIsHorizontal(Ptr<BRepEdge> edge)
+{
+    return Equal(abs(edge->startVertex()->geometry()->z() - edge->endVertex()->geometry()->z()), 0, 0.01) && !edge->isDegenerate();
+}
+
+bool EdgeIsVerticalLine(Ptr<BRepEdge> edge)
+{
+    return Equal(abs(edge->startVertex()->geometry()->z() - edge->endVertex()->geometry()->z()), edge->length(), 0.01) && !edge->isDegenerate();
 }
 
 void SaveAsStl(Ptr<BRepBody> body, std::string filepath)

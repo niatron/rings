@@ -18,6 +18,9 @@ public:
     double cuttedSphreRadius = 0;
     Ptr<Point3D> centerPoint;
     double zMoveShift = 0;
+    double filletRadius = 0;
 
     Ptr<BRepBody> createBody(Ptr<Component> component);
+private:
+    bool edgeIsInHole(Ptr<BRepEdge> edge);
 };

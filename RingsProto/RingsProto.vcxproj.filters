@@ -13,6 +13,9 @@
     <ClCompile Include="VolfUpPart.cpp">
       <Filter>Rings2DSquares</Filter>
     </ClCompile>
+    <ClCompile Include="BasePart.cpp">
+      <Filter>Rings2DSquares</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="RingsProto.manifest" />
@@ -27,6 +30,9 @@
       <Filter>Rings2DSquares</Filter>
     </ClInclude>
     <ClInclude Include="VolfUpPart.h">
+      <Filter>Rings2DSquares</Filter>
+    </ClInclude>
+    <ClInclude Include="BasePart.h">
       <Filter>Rings2DSquares</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,13 +1,12 @@
 #pragma once
 
 #include "FusionEnvironment.h"
+#include "BasePart.h"
 #include "VolfDownPart.h"
 #include "VolfUpPart.h"
 
 using namespace adsk::core;
 using namespace adsk::fusion;
-
-#define RAD_45 M_PI / 4.0
 
 class Rings2D2Squares
 {
@@ -33,8 +32,8 @@ public:
     double floorThickness = 0.3;
     double moovableClearence = ABS_MOOVABLE_CLEARNCE;
     double unmoovableClearence = ABS_UNMOOVABLE_CLEARNCE;
-    double verticalEdgeFilletRadius = 0.12;
-    double horizontalEdgeFilletRadius = 0.08;
+    double verticalEdgeFilletRadius = 0.24;
+    double horizontalEdgeFilletRadius = 0.12;
 private:
     Ptr<ConstructionAxis> leftAxis = nullptr;
     Ptr<ConstructionAxis> rightAxis = nullptr;

@@ -12,6 +12,7 @@ using namespace adsk::core;
 using namespace adsk::fusion;
 //using namespace adsk::cam;
 
+#define RAD_45  M_PI * 0.25
 #define RAD_90  M_PI * 0.5
 #define RAD_180 M_PI * 1.0
 #define RAD_360 M_PI * 2.0
@@ -80,12 +81,17 @@ Ptr<BRepBody> Combine(Ptr<Component> component, FeatureOperations operation, Ptr
 Ptr<FilletFeature> Fillet(Ptr<Component> component, Ptr<ObjectCollection> edges, double val);
 
 Ptr<ObjectCollection> GetEdges(Ptr<BRepBody> body, std::function <bool(Ptr<BRepEdge>)> isGoodEdge);
+Ptr<ObjectCollection> GetEdges(Ptr<ObjectCollection> edges, std::function <bool(Ptr<BRepEdge>)> isGoodEdge);
 Ptr<ObjectCollection> GetEdges(std::vector<Ptr<BRepFace>> joinedFaces, std::vector<Ptr<BRepFace>> unjoinedFaces);
+double GetMin(Ptr<ObjectCollection> items, std::function <double(Ptr<Base>)> getValue);
 
 Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis);
 
 Ptr<BRepBody> CreateSphere(Ptr<Component> component, Ptr<Point3D> center, double radius);
 Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, double radius, double height);
+
+bool EdgeIsHorizontal(Ptr<BRepEdge> edge);
+bool EdgeIsVerticalLine(Ptr<BRepEdge> edge);
 
 void SaveAsStl(Ptr<BRepBody> body, std::string filepath);
 
