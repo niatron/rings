@@ -182,6 +182,21 @@ void Rotate(Ptr<Sketch> sketch, double angel, Ptr<Point3D> point)
 }
 
 
+void Rotate(Ptr<SectionAnalysis> analysis, double angel, Ptr<Vector3D> axis, Ptr<Point3D> originPointOfAxis)
+{
+    Ptr<Plane> plane = analysis->cutPlane();
+    auto matrix = Matrix3D::create();
+    matrix->setToRotation(angel, axis, originPointOfAxis);
+    analysis->transform(matrix);
+}
+
+void Rotate(Ptr<SectionAnalysis> analysis, double angel, Ptr<ConstructionAxis> axis)
+{
+    auto vectorPoint = ConstructionAxisToVectorPoint(axis);
+    Rotate(analysis, angel, vectorPoint.vector, vectorPoint.point);
+}
+
+
 Ptr<ConstructionPoint> AddConstructionPoint(Ptr<Component> component, Ptr<Base> point)
 {
     auto input = component->constructionPoints()->createInput();
@@ -397,6 +412,13 @@ Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis)
 	auto point = Point3D::create();
 	axis->geometry()->getData(point, vector);
 	return vector;
+}
+
+VectorPoint ConstructionAxisToVectorPoint(Ptr<ConstructionAxis> axis)
+{
+    VectorPoint vectorPoint;
+    axis->geometry()->getData(vectorPoint.point, vectorPoint.vector);
+    return vectorPoint;
 }
 
 Ptr<BRepBody> CreateSphere(Ptr<Component> component, Ptr<Point3D> center, double radius)

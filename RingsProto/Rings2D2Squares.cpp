@@ -67,15 +67,16 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
     roofPart.wallThickness = 0.16;
 
     volfDownPart.radius = volfRadius;
-    volfDownPart.height = 0.46;
-    volfDownPart.holeDownRadius = 0.32;
-    volfDownPart.holeDownHeight = 0.28;
+    volfDownPart.height = 0.54;
+    volfDownPart.holeDownRadius = 0.28;
+    volfDownPart.holeDownHeight = 0.3;
     volfDownPart.holeRadius = 0.15;
 
     volfUpPart.height = 0.4;
     volfUpPart.middleRadius = 0.3;
     volfUpPart.holeRadius = 0.14;
-    volfUpPart.cuttedSphreCuttingHeight = 0.15;
+    volfUpPart.form = VolfUpPart::convex;
+    volfUpPart.concaveHeight = 0.15;
 
     volfDownPart.holeHeight = volfDownPart.height;
     volfDownPart.zMoveShift = basePart.floorThickness + moovableClearence;
@@ -83,8 +84,9 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
 
     volfUpPart.radius = volfRadius;
     volfUpPart.middleHeight = roofPart.floorThickness + moovableClearence * 3.0;
-    volfUpPart.holeHeight = volfUpPart.middleHeight + volfUpPart.height;
-    volfUpPart.cuttedSphreRadius = volfRadius * 3.0;
+    volfUpPart.holeHeight = volfUpPart.middleHeight + volfUpPart.height - 0.2;
+    volfUpPart.concaveRadius = volfRadius * 3.0;
+    volfUpPart.convexRadius = volfRadius * 3.0;
     volfUpPart.filletRadius = horizontalEdgeFilletRadius;
 
     basePart.lineLength = getLineLength();
@@ -129,9 +131,13 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
     
     Ptr<BRepBody> volfDownBody;
     Ptr<BRepBody> volfUpBody;
-    for (int i = 0; i < volfsSketch->sketchCurves()->sketchCircles()->count() && i < 2; i++)
+    int k = 0;
+    for (int i = 0; i < volfsSketch->sketchCurves()->sketchCircles()->count() && k < 2; i++)
     {
         auto volfCenter = volfsSketch->sketchCurves()->sketchCircles()->item(i)->centerSketchPoint()->geometry();
+        if (volfCenter->x() < getRightCenterPoint()->x() + 2.0 * getVolfRadius() || volfCenter->y() < 0)
+            continue;
+        k++;
 
         volfDownPart.centerPoint = volfCenter;
         volfDownBody = volfDownPart.createBody(component);
@@ -145,6 +151,8 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
 
     auto analysis = AddSectionAnalysis(component, component->xZConstructionPlane(), 0);
     analysis->flip();
+    Rotate(analysis, RAD_45, rightAxis);
+    
     component->parentDesign()->namedViews()->homeNamedView()->apply();
 
     std::string modelsFolderPath = "D:\\ServerTechnology\\RingsModels\\2D2S12v3\\";
@@ -155,6 +163,7 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
         Ptr<BRepBody> roofBody = roofBodies->item(i);
         SaveAsStl(roofBody, modelsFolderPath + roofBody->name() + ".stl");
     }
+    
     SaveAsStl(volfUpBody, modelsFolderPath + "VolfUpBody.stl");
     SaveAsStl(volfDownBody, modelsFolderPath + "VolfDownBody.stl");
 

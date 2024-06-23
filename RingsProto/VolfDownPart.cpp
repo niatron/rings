@@ -40,6 +40,9 @@ Ptr<BRepBody> VolfDownPart::createBody(Ptr<Component> component)
     auto edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && (edge->endVertex()->geometry()->z() > height * 1.1 || edgeIsInHole(edge)); });
     Fillet(component, edges, filletRadius / 2.0);
 
+    edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && Equal(edge->length(), GetCircleLength(holeDownRadius), 0.1) && Equal(edge->endVertex()->geometry()->z(), holeDownHeight, 0.01); });
+    Fillet(component, edges, filletRadius / 3.0 * 2.0);
+
     edges = GetEdges(body, EdgeIsHorizontal);
     Fillet(component, edges, filletRadius);
     

@@ -1,8 +1,12 @@
 #pragma once
 #include "FusionEnvironment.h"
 
+
+
 class VolfUpPart
 {
+public:
+    enum Form { convex, concave, straight };
 public:
     double radius;
     double height;
@@ -14,11 +18,13 @@ public:
     double holeUpHeight = 0;
     double holeDownRadius = 0;
     double holeDownHeight = 0;
-    double cuttedSphreCuttingHeight = 0;
-    double cuttedSphreRadius = 0;
     Ptr<Point3D> centerPoint;
     double zMoveShift = 0;
     double filletRadius = 0;
+    Form form = straight;
+    double concaveHeight = 0;
+    double concaveRadius = 0;
+    double convexRadius = 0;
 
     Ptr<BRepBody> createBody(Ptr<Component> component);
 private:

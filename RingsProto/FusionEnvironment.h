@@ -32,6 +32,12 @@ enum CubeFaceType {
     Back
 };
 
+struct VectorPoint
+{
+    Ptr<Vector3D> vector;
+    Ptr<Point3D> point;
+};
+
 Ptr<Point3D> GetCenterPoint();
 Ptr<Point3D> GetCirclePoint(double radius, double angel);
 Ptr<Point3D> GetCirclePoint(Ptr<Point3D> circleCenter, double radius, double angel, bool saveZ = false);
@@ -59,6 +65,9 @@ Ptr<Sketch> CreateSketch(Ptr<Component> component, Ptr<ConstructionPlane> plane,
 void Rotate(Ptr<Sketch> sketch, double angel, Ptr<Point3D> point, Ptr<ObjectCollection> items);
 void Rotate(Ptr<Sketch> sketch, double angel, Ptr<Point3D> point, std::initializer_list<Ptr<Base>> items);
 void Rotate(Ptr<Sketch> sketch, double angel, Ptr<Point3D> point);
+
+void Rotate(Ptr<SectionAnalysis> analysis, double angel, Ptr<Vector3D> axis, Ptr<Point3D> originPointOfAxis);
+void Rotate(Ptr<SectionAnalysis> analysis, double angel, Ptr<ConstructionAxis> axis);
 
 Ptr<ConstructionPoint> AddConstructionPoint(Ptr<Component> component, Ptr<Base> point);
 Ptr<ConstructionAxis> AddConstructionAxis(Ptr<Component> component, Ptr<Point3D> point, Ptr<Vector3D> vector);
@@ -88,6 +97,7 @@ Ptr<ObjectCollection> GetEdges(std::vector<Ptr<BRepFace>> joinedFaces, std::vect
 double GetMin(Ptr<ObjectCollection> items, std::function <double(Ptr<Base>)> getValue);
 
 Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis);
+VectorPoint ConstructionAxisToVectorPoint(Ptr<ConstructionAxis> axis);
 
 Ptr<BRepBody> CreateSphere(Ptr<Component> component, Ptr<Point3D> center, double radius);
 Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, double radius, double height);

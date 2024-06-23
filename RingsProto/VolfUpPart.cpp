@@ -37,10 +37,15 @@ Ptr<BRepBody> VolfUpPart::createBody(Ptr<Component> component)
         body = Combine(component, CutFeatureOperation, body, holeBody);
     }
 
-    if (cuttedSphreRadius > 0 && cuttedSphreCuttingHeight > 0)
+    if(form == concave && concaveRadius > 0 && concaveHeight > 0)
     {
-        auto sphereBody = CreateSphere(component, Point3D::create(centerPoint->x(), centerPoint->y(), height + middleHeight + cuttedSphreRadius - cuttedSphreCuttingHeight), cuttedSphreRadius);
+        auto sphereBody = CreateSphere(component, Point3D::create(centerPoint->x(), centerPoint->y(), height + middleHeight + concaveRadius - concaveHeight), concaveRadius);
         body = Combine(component, CutFeatureOperation, body, sphereBody);
+    }
+    else if (form == convex && convexRadius > 0)
+    {
+        auto sphereBody = CreateSphere(component, Point3D::create(centerPoint->x(), centerPoint->y(), height + middleHeight - convexRadius), convexRadius);
+        body = Combine(component, IntersectFeatureOperation, body, sphereBody);
     }
 
     auto edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && edge->endVertex()->geometry()->z() > middleHeight * 0.9 && !edgeIsInHole(edge); });
