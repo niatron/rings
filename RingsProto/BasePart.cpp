@@ -79,6 +79,26 @@ Ptr<Sketch> BasePart::createCirclesSketch(Ptr<Component> component, double circl
     return leftSketch;
 }
 
+void BasePart::filletBody(Ptr<Component> component, Ptr<BRepBody> body)
+{
+    auto edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsVerticalLine(edge) && abs(edge->endVertex()->geometry()->x()) <= 0.01 && abs(edge->endVertex()->geometry()->y()) < innerWidth + outerWidth; });
+    auto minY = GetMin(edges, [=](Ptr<BRepEdge> edge) {return abs(edge->endVertex()->geometry()->y()); });
+    edges = GetEdges(edges, [=](Ptr<BRepEdge> edge) {return abs(edge->endVertex()->geometry()->y()) < minY + 0.01; });
+    Fillet(component, edges, verticalEdgeFilletRadius / 2.0);
+
+    edges = GetEdges(body, EdgeIsVerticalLine);
+    Fillet(component, edges, verticalEdgeFilletRadius);
+
+    edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && edge->endVertex()->geometry()->z() > floorThickness * 1.1; });
+    Fillet(component, edges, topEdgeFilletRadius);
+
+    edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && Equal(edge->length(), GetCircleLength(circlesOnSquareRadius), 0.1); });
+    Fillet(component, edges, floorThickness / 3.0);
+
+    edges = GetEdges(body, EdgeIsHorizontal);
+    Fillet(component, edges, otherEdgeFilletRadius);
+}
+
 Ptr<BRepBody> BasePart::createBody(Ptr<Component> component)
 {
     auto cornerOuterRadius = cornerMiddleRadius + outerWidth;
@@ -97,19 +117,7 @@ Ptr<BRepBody> BasePart::createBody(Ptr<Component> component)
         body = Combine(component, CutFeatureOperation, body, magnetBody->bodies()->item(0));
     }
 
-    auto edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsVerticalLine(edge) && abs(edge->endVertex()->geometry()->x()) <= 0.01 && abs(edge->endVertex()->geometry()->y()) < width; });
-    auto minY = GetMin(edges, [=](Ptr<BRepEdge> edge) {return abs(edge->endVertex()->geometry()->y()); });
-    edges = GetEdges(edges, [=](Ptr<BRepEdge> edge) {return abs(edge->endVertex()->geometry()->y()) < minY + 0.01; });
-    Fillet(component, edges, verticalEdgeFilletRadius / 2.0);
-
-    edges = GetEdges(body, EdgeIsVerticalLine);
-    Fillet(component, edges, verticalEdgeFilletRadius);
-
-    edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && edge->endVertex()->geometry()->z() > floorThickness * 1.1; });
-    Fillet(component, edges, wallTopEdgeFilletRadius);
-
-    edges = GetEdges(body, EdgeIsHorizontal);
-    Fillet(component, edges, otherEdgeFilletRadius);
+    filletBody(component, body);
 
     return body;
 }

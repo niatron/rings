@@ -7,6 +7,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <initializer_list>
+#include "Geometry.h"
 
 using namespace adsk::core;
 using namespace adsk::fusion;
@@ -78,6 +79,7 @@ Ptr<ObjectCollection> ExtrudeAll(Ptr<Component> component, Ptr<Sketch> sketch, d
 Ptr<BRepBody> Move(Ptr<Component> component, Ptr<BRepBody> body, Ptr<ConstructionAxis> axis, double distance, bool createCopy = false);
 Ptr<BRepBody> Rotate(Ptr<Component> component, Ptr<BRepBody> body, Ptr<ConstructionAxis> axis, double angel, bool createCopy = false);
 Ptr<BRepBody> Combine(Ptr<Component> component, FeatureOperations operation, Ptr<BRepBody> body1, Ptr<BRepBody> body2);
+Ptr<CombineFeature> CreateCombineFeature(Ptr<Component> component, FeatureOperations operation, Ptr<BRepBody> body1, Ptr<BRepBody> body2);
 Ptr<FilletFeature> Fillet(Ptr<Component> component, Ptr<ObjectCollection> edges, double val);
 
 Ptr<ObjectCollection> GetEdges(Ptr<BRepBody> body, std::function <bool(Ptr<BRepEdge>)> isGoodEdge);
@@ -92,6 +94,10 @@ Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, doub
 
 bool EdgeIsHorizontal(Ptr<BRepEdge> edge);
 bool EdgeIsVerticalLine(Ptr<BRepEdge> edge);
+
+bool BodyContainPoint(Ptr<BRepBody> body, Ptr<Point3D> point);
+
+Ptr<SectionAnalysis> AddSectionAnalysis(Ptr<Component> component, Ptr<Base> plane, double distance);
 
 void SaveAsStl(Ptr<BRepBody> body, std::string filepath);
 

@@ -102,6 +102,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="RingsProtoCreator.cpp" />
+    <ClCompile Include="RoofPart.cpp" />
     <ClCompile Include="VolfDownPart.cpp" />
     <ClCompile Include="VolfUpPart.cpp" />
   </ItemGroup>
@@ -118,6 +119,7 @@
     <ClInclude Include="Rings2D2Circles.h" />
     <ClInclude Include="Rings2D2Squares.h" />
     <ClInclude Include="RingsProtoCreator.h" />
+    <ClInclude Include="RoofPart.h" />
     <ClInclude Include="VolfDownPart.h" />
     <ClInclude Include="VolfUpPart.h" />
   </ItemGroup>

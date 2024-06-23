@@ -11,3 +11,4 @@ double GetTriangleSideLength(double side1, double side2, double angleInRadians);
 double GetRightTriangleLeg(double otherLeg, double oppositeAngleInRadians);
 double GetRightTriangleLegByHypotenuseAndAdjacentAngle(double hypotenuse, double adjacentAngleInRadians);
 double GetIsoscelesTriangleLeg(double baseSideLength, double legsAngelInRadians);
+double GetCircleLength(double radius);

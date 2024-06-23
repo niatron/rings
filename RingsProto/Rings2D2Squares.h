@@ -2,6 +2,7 @@
 
 #include "FusionEnvironment.h"
 #include "BasePart.h"
+#include "RoofPart.h"
 #include "VolfDownPart.h"
 #include "VolfUpPart.h"
 
@@ -20,16 +21,14 @@ class Rings2D2Squares
     };
 
 public:
+    BasePart basePart;
+    RoofPart roofPart;
+    VolfUpPart volfUpPart;
+    VolfDownPart volfDownPart;
+
     double lineVolfCount = 1;
     double cornerVolfCount = 2;
-    double volfLegRadius = 0.3;
-    double volfLegThickness = 0.5;
-    double volfLegHoleRadius = 0.14;
-    double volfHeadThickness = 0.5;
     double squareMiddleSize = 5; //length bitween centers of paralel line ways
-    double wallThickness = 0.16;
-    double magnetRadius = 0.25;
-    double floorThickness = 0.3;
     double moovableClearence = ABS_MOOVABLE_CLEARNCE;
     double unmoovableClearence = ABS_UNMOOVABLE_CLEARNCE;
     double verticalEdgeFilletRadius = 0.24;
@@ -48,12 +47,6 @@ private:
     
     Ptr<Point3D> getLeftCenterPoint();
     Ptr<Point3D> getRightCenterPoint();
-    
-    Ptr<Sketch> createSketchRings(Ptr<Component> component, double volfRadius, int count = -1);
-    
-    Ptr<BRepBody> createPairedSquares(Ptr<Component> component, double size, double cornerHeightOuter, double rotateAngel, double thickness, double height);
-    
-    Ptr<BRepBody> createVolfDownBody(Ptr<Component> component, VolfDownPart volfDownPart);
 public:
     void createBodies(Ptr<Component> component);
 };

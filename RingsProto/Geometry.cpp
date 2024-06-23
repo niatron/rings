@@ -29,3 +29,8 @@ double GetIsoscelesTriangleLeg(double baseSideLength, double legsAngelInRadians)
 {
     return sqrt(pow(baseSideLength, 2) / (2.0 - 2.0 * cos(legsAngelInRadians)));
 }
+
+double GetCircleLength(double radius)
+{
+    return 2.0 * M_PI * radius;
+}

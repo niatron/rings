@@ -300,14 +300,19 @@ Ptr<BRepBody> Rotate(Ptr<Component> component, Ptr<BRepBody> body, Ptr<Construct
 
 Ptr<BRepBody> Combine(Ptr<Component> component, FeatureOperations operation, Ptr<BRepBody> body1, Ptr<BRepBody> body2)
 {
-	auto combineFeatures = component->features()->combineFeatures();
+    return CreateCombineFeature(component, operation, body1, body2)->bodies()->item(0);
+}
 
-	Ptr<ObjectCollection> collection = ObjectCollection::create();
-	collection->add(body2);
+Ptr<CombineFeature> CreateCombineFeature(Ptr<Component> component, FeatureOperations operation, Ptr<BRepBody> body1, Ptr<BRepBody> body2)
+{
+    auto combineFeatures = component->features()->combineFeatures();
 
-	auto joinInput = combineFeatures->createInput(body1, collection);
-	joinInput->operation(operation);
-	return combineFeatures->add(joinInput)->bodies()->item(0);
+    Ptr<ObjectCollection> collection = ObjectCollection::create();
+    collection->add(body2);
+
+    auto joinInput = combineFeatures->createInput(body1, collection);
+    joinInput->operation(operation);
+    return combineFeatures->add(joinInput);
 }
 
 Ptr<FilletFeature> Fillet(Ptr<Component> component, Ptr<ObjectCollection> edges, double val)
@@ -423,6 +428,18 @@ bool EdgeIsHorizontal(Ptr<BRepEdge> edge)
 bool EdgeIsVerticalLine(Ptr<BRepEdge> edge)
 {
     return Equal(abs(edge->startVertex()->geometry()->z() - edge->endVertex()->geometry()->z()), edge->length(), 0.01) && !edge->isDegenerate();
+}
+
+bool BodyContainPoint(Ptr<BRepBody> body, Ptr<Point3D> point)
+{
+    auto pointContainment = body->pointContainment(point);
+    return pointContainment == PointInsidePointContainment || pointContainment == PointOnPointContainment;
+}
+
+Ptr<SectionAnalysis> AddSectionAnalysis(Ptr<Component> component, Ptr<Base> plane, double distance)
+{
+    auto input = component->parentDesign()->analyses()->sectionAnalyses()->createInput(plane, distance);
+    return component->parentDesign()->analyses()->sectionAnalyses()->add(input);
 }
 
 void SaveAsStl(Ptr<BRepBody> body, std::string filepath)
