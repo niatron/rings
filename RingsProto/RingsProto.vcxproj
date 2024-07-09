@@ -95,6 +95,7 @@
     <ClCompile Include="BasePart.cpp" />
     <ClCompile Include="FusionEnvironment.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="RectangledRoofPart.cpp" />
     <ClCompile Include="Rings2D2Circles.cpp" />
     <ClCompile Include="Rings2D2Squares.cpp" />
     <ClCompile Include="RingsProto.cpp">
@@ -116,6 +117,7 @@
     <ClInclude Include="BasePart.h" />
     <ClInclude Include="FusionEnvironment.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="RectangledRoofPart.h" />
     <ClInclude Include="Rings2D2Circles.h" />
     <ClInclude Include="Rings2D2Squares.h" />
     <ClInclude Include="RingsProtoCreator.h" />

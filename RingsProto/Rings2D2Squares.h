@@ -3,6 +3,7 @@
 #include "FusionEnvironment.h"
 #include "BasePart.h"
 #include "RoofPart.h"
+#include "RectangledRoofPart.h"
 #include "VolfDownPart.h"
 #include "VolfUpPart.h"
 
@@ -22,7 +23,7 @@ class Rings2D2Squares
 
 public:
     BasePart basePart;
-    RoofPart roofPart;
+    RectangledRoofPart roofPart;
     VolfUpPart volfUpPart;
     VolfDownPart volfDownPart;
 

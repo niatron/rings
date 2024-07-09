@@ -55,7 +55,7 @@ Ptr<BRepFace> getBodyFace(Ptr<BRepBody> body, CubeFaceType faceType);
 Ptr<BRepFace> getBodyFace(Ptr<BRepBody> body, Ptr<Point3D> pointOnFace, double tolerance);
 Ptr<BRepEdge> getJoinedEdge(Ptr<BRepFace> face1, Ptr<BRepFace> face2);
 
-void MessageBox(std::string message);
+DialogResults MessageBox(std::string message, std::string title = "", MessageBoxButtonTypes buttonType = OKButtonType);
 
 void addToObjectCollection(Ptr<ObjectCollection> objectCollection, std::initializer_list<Ptr<Base>> items);
 Ptr<ObjectCollection> createObjectCollection(std::initializer_list<Ptr<Base>> items);
@@ -101,6 +101,7 @@ VectorPoint ConstructionAxisToVectorPoint(Ptr<ConstructionAxis> axis);
 
 Ptr<BRepBody> CreateSphere(Ptr<Component> component, Ptr<Point3D> center, double radius);
 Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, double radius, double height);
+Ptr<BRepBody> CreateBox(Ptr<Component> component, Ptr<Point3D> point1, Ptr<Point3D> point2, double height);
 
 bool EdgeIsHorizontal(Ptr<BRepEdge> edge);
 bool EdgeIsVerticalLine(Ptr<BRepEdge> edge);

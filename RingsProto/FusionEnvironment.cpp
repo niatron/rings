@@ -132,9 +132,9 @@ Ptr<BRepEdge> getJoinedEdge(Ptr<BRepFace> face1, Ptr<BRepFace> face2)
     return nullptr;
 }
 
-void MessageBox(std::string message)
+DialogResults MessageBox(std::string message, std::string title, MessageBoxButtonTypes buttonType)
 {
-    Application::get()->userInterface()->messageBox(message);
+    return Application::get()->userInterface()->messageBox(message, title, buttonType);
 }
 
 void addToObjectCollection(Ptr<ObjectCollection> objectCollection, std::initializer_list<Ptr<Base>> items)
@@ -439,6 +439,16 @@ Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, doub
 {
     auto sketch = CreateSketch(component, component->xYConstructionPlane(), "CilinderSketch");
     AddCircle(sketch, center, radius);
+    return Extrude(component, sketch->profiles()->item(0), height)->bodies()->item(0);
+}
+
+Ptr<BRepBody> CreateBox(Ptr<Component> component, Ptr<Point3D> point1, Ptr<Point3D> point2, double height)
+{
+    auto sketch = CreateSketch(component, component->xYConstructionPlane(), "BoxSketch");
+    auto line1 = AddLine(sketch, Point3D::create(point1->x(), point1->y()), Point3D::create(point2->x(), point1->y()));
+    auto line2 = AddLine(sketch, line1->endSketchPoint()->geometry(), Point3D::create(point2->x(), point2->y()));
+    auto line3 = AddLine(sketch, line2->endSketchPoint()->geometry(), Point3D::create(point1->x(), point2->y()));
+    auto line4 = AddLine(sketch, line3->endSketchPoint()->geometry(), line1->startSketchPoint()->geometry());
     return Extrude(component, sketch->profiles()->item(0), height)->bodies()->item(0);
 }
 

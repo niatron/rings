@@ -72,7 +72,7 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
     volfDownPart.holeDownHeight = 0.3;
     volfDownPart.holeRadius = 0.15;
 
-    volfUpPart.height = 0.4;
+    volfUpPart.height = 0.5;
     volfUpPart.middleRadius = 0.3;
     volfUpPart.holeRadius = 0.14;
     volfUpPart.form = VolfUpPart::convex;
@@ -83,10 +83,10 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
     volfDownPart.filletRadius = horizontalEdgeFilletRadius;
 
     volfUpPart.radius = volfRadius;
-    volfUpPart.middleHeight = roofPart.floorThickness + moovableClearence * 3.0;
-    volfUpPart.holeHeight = volfUpPart.middleHeight + volfUpPart.height - 0.2;
+    volfUpPart.middleHeight = roofPart.floorThickness;
+    volfUpPart.holeHeight = volfUpPart.middleHeight + volfUpPart.height;
     volfUpPart.concaveRadius = volfRadius * 3.0;
-    volfUpPart.convexRadius = volfRadius * 3.0;
+    volfUpPart.convexRadius = volfRadius * 1.5;
     volfUpPart.filletRadius = horizontalEdgeFilletRadius;
 
     basePart.lineLength = getLineLength();
@@ -154,6 +154,9 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
     Rotate(analysis, RAD_45, rightAxis);
     
     component->parentDesign()->namedViews()->homeNamedView()->apply();
+
+    if (MessageBox("Save bodies as STL?", "", YesNoButtonType) == DialogNo)
+        return;
 
     std::string modelsFolderPath = "D:\\ServerTechnology\\RingsModels\\2D2S12v3\\";
     

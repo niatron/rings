@@ -8,9 +8,9 @@ public:
     double separationOuterWidth;
     double downTrimmingThicknes;
     Ptr<ObjectCollection> createBodies(Ptr<Component> component);
+protected:
     bool edgeOnInnerCorner(Ptr<BRepEdge> edge);
     void filletBody(Ptr<Component> component, Ptr<BRepBody> body);
-private:
     Ptr<BRepBody> createBody(Ptr<Component> component);
     
 };
