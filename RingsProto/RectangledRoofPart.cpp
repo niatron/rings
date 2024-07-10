@@ -9,17 +9,26 @@ Ptr<ObjectCollection> RectangledRoofPart::createBodies(Ptr<Component> component)
 
     auto body = createPairedSquares(component, lineLength, cornerOuterRadius, RAD_45, width, height);
     auto box = body->boundingBox();
-    auto boxBody = CreateBox(component, box->minPoint(), box->maxPoint(), height);
-    auto edges = GetEdges(boxBody, EdgeIsVerticalLine);
-    Fillet(component, edges, cornerFilletRadius);
-    body = Combine(component, JoinFeatureOperation, body, boxBody);
+    auto boundWallBody = CreateBox(component, box->minPoint(), box->maxPoint(), height, cornerFilletRadius, wallThickness);
+    auto roofBody = CreateBox(component, box->minPoint(), box->maxPoint(), floorThickness, cornerFilletRadius);
+    roofBody = Move(component, roofBody, component->zConstructionAxis(), height - floorThickness);
+    body = Combine(component, JoinFeatureOperation, body, boundWallBody);
+    body = Combine(component, JoinFeatureOperation, body, roofBody);
+    //auto centerUpBound = CreateBound(box->maxPoint()->y(), box->maxPoint()->y() - cornerOuterRadius, leftCenterPoint->x(), rightCenterPoint->x());
+    //auto centerDownBound = CreateBound(box->minPoint()->y(), box->minPoint()->y() + cornerOuterRadius, leftCenterPoint->x(), rightCenterPoint->x());
+    //auto centerUpBody = CreateBox(component, centerUpBound->minPoint(), centerUpBound->maxPoint(), height);
+    //auto centerDownBody = CreateBox(component, centerDownBound->minPoint(), centerDownBound->maxPoint(), height);
+    //body = Combine(component, JoinFeatureOperation, body, centerUpBody);
+    //body = Combine(component, JoinFeatureOperation, body, centerDownBody);
 
     auto cutBody = createPairedSquares(component, lineLength, cornerOuterRadius - wallThickness, RAD_45, width - 2.0 * wallThickness, height - floorThickness);
     auto separationCutBody = createPairedSquares(component, lineLength, separationCornerOuterRadius, RAD_45, separationWidth, height);
     cutBody = Combine(component, JoinFeatureOperation, cutBody, separationCutBody);
     auto substrateCutBody = CreateCylinder(component, Point3D::create(), 2.0 * (lineLength + cornerOuterRadius * 2.0), downTrimmingThicknes);
     cutBody = Combine(component, JoinFeatureOperation, cutBody, substrateCutBody);
-
+    auto deepBox = CutShell(box, wallThickness);
+    auto deepCutBody = CreateBox(component, deepBox->minPoint(), deepBox->maxPoint(), deepThickness, cornerFilletRadius - wallThickness);
+    cutBody = Combine(component, JoinFeatureOperation, cutBody, deepCutBody);
     auto feature = CreateCombineFeature(component, CutFeatureOperation, body, cutBody);
 
     auto result = ObjectCollection::create();

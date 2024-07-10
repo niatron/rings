@@ -55,10 +55,10 @@ Ptr<Point3D> Rings2D2Squares::getRightCenterPoint()
     return Point3D::create(getSquareShift());
 }
 
-void Rings2D2Squares::createBodies(Ptr<Component> component)
+void Rings2D2Squares::SetParams(BasePart& basePart, RoofPart& roofPart, VolfUpPart& volfUpPart, VolfDownPart& volfDownPart)
 {
     auto volfRadius = getVolfRadius() - moovableClearence / (cornerVolfCount * 4.0 + lineVolfCount * 4.0);
-    
+
     basePart.floorThickness = 0.3;
     basePart.wallThickness = 0.16;
     basePart.circlesOnSquareRadius = 0.25;
@@ -117,6 +117,80 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
     roofPart.otherEdgeFilletRadius = horizontalEdgeFilletRadius / 2.0;
 
     volfUpPart.zMoveShift = basePart.height + unmoovableClearence + roofPart.floorThickness + moovableClearence;
+}
+
+
+void Rings2D2Squares::SetParams(RectangledBasePart& basePart, RectangledRoofPart& roofPart, VolfUpPart& volfUpPart, VolfDownPart& volfDownPart)
+{
+    auto volfRadius = getVolfRadius() - moovableClearence / (cornerVolfCount * 4.0 + lineVolfCount * 4.0);
+
+    basePart.floorThickness = 0.3;
+    basePart.wallThickness = 0.16;
+    basePart.circlesOnSquareRadius = 0.25;
+
+    roofPart.floorThickness = 0.3;
+    roofPart.wallThickness = 0.16;
+    roofPart.cornerFilletRadius = getVolfRadius() * 2.0;
+
+    volfDownPart.radius = volfRadius;
+    volfDownPart.height = 0.54;
+    volfDownPart.holeDownRadius = 0.28;
+    volfDownPart.holeDownHeight = 0.3;
+    volfDownPart.holeRadius = 0.15;
+
+    volfUpPart.height = 0.5;
+    volfUpPart.middleRadius = 0.3;
+    volfUpPart.holeRadius = 0.14;
+    volfUpPart.form = VolfUpPart::convex;
+    volfUpPart.concaveHeight = 0.15;
+
+    volfDownPart.holeHeight = volfDownPart.height;
+    volfDownPart.zMoveShift = basePart.floorThickness + moovableClearence;
+    volfDownPart.filletRadius = horizontalEdgeFilletRadius;
+
+    volfUpPart.radius = volfRadius;
+    volfUpPart.middleHeight = roofPart.floorThickness;
+    volfUpPart.holeHeight = volfUpPart.middleHeight + volfUpPart.height;
+    volfUpPart.concaveRadius = volfRadius * 3.0;
+    volfUpPart.convexRadius = volfRadius * 1.5;
+    volfUpPart.filletRadius = horizontalEdgeFilletRadius;
+
+    basePart.lineLength = getLineLength();
+    basePart.cornerMiddleRadius = getCornerOuterRadius() - getVolfRadius();
+    basePart.innerWidth = getVolfRadius() + basePart.wallThickness + roofPart.wallThickness + moovableClearence * 1.5;
+    basePart.outerWidth = getVolfRadius() + basePart.wallThickness + roofPart.wallThickness + moovableClearence * 0.5;
+    basePart.height = basePart.floorThickness + volfDownPart.height + 2.0 * moovableClearence;
+    basePart.leftCenterPoint = getLeftCenterPoint();
+    basePart.rightCenterPoint = getRightCenterPoint();
+    basePart.circlesOnSquarePeriodRadius = getVolfRadius();
+    basePart.topEdgeFilletRadius = horizontalEdgeFilletRadius / 2.0;
+    basePart.verticalEdgeFilletRadius = verticalEdgeFilletRadius;
+    basePart.otherEdgeFilletRadius = horizontalEdgeFilletRadius;
+    basePart.cuttingShellThickness = basePart.wallThickness + roofPart.wallThickness;
+    basePart.cornerFilletRadius = roofPart.cornerFilletRadius - roofPart.wallThickness;
+
+    roofPart.lineLength = getLineLength();
+    roofPart.cornerMiddleRadius = getCornerOuterRadius() - getVolfRadius();
+    roofPart.innerWidth = basePart.innerWidth - roofPart.wallThickness;
+    roofPart.outerWidth = basePart.outerWidth - roofPart.wallThickness;
+    roofPart.height = basePart.height + roofPart.floorThickness + unmoovableClearence;
+    roofPart.leftCenterPoint = basePart.leftCenterPoint;
+    roofPart.rightCenterPoint = basePart.rightCenterPoint;
+    roofPart.separationInnerWidth = volfUpPart.middleRadius + moovableClearence * 1.5;
+    roofPart.separationOuterWidth = volfUpPart.middleRadius + moovableClearence * 0.5;
+    roofPart.downTrimmingThicknes = moovableClearence * 2.0;
+    //roofPart.circlesOnSquarePeriodRadius = getVolfRadius();
+    roofPart.topEdgeFilletRadius = horizontalEdgeFilletRadius;
+    roofPart.verticalEdgeFilletRadius = verticalEdgeFilletRadius;
+    roofPart.otherEdgeFilletRadius = horizontalEdgeFilletRadius / 2.0;
+    roofPart.deepThickness = basePart.floorThickness;
+
+    volfUpPart.zMoveShift = basePart.height + unmoovableClearence + roofPart.floorThickness + moovableClearence;
+}
+
+void Rings2D2Squares::createBodies(Ptr<Component> component)
+{
+    SetParams(basePart, roofPart, volfUpPart, volfDownPart);
 
     if (leftAxis == nullptr)
         leftAxis = AddConstructionAxis(component, getLeftCenterPoint(), Vector3D::create(0, 0, 1));
@@ -131,7 +205,7 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
     
     Ptr<BRepBody> volfDownBody;
     Ptr<BRepBody> volfUpBody;
-    int k = 0;
+    int k = 2;
     for (int i = 0; i < volfsSketch->sketchCurves()->sketchCircles()->count() && k < 2; i++)
     {
         auto volfCenter = volfsSketch->sketchCurves()->sketchCircles()->item(i)->centerSketchPoint()->geometry();
@@ -148,7 +222,7 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
         volfUpBody = volfUpPart.createBody(component);
         //volfUpBody->isLightBulbOn(false);
     }
-
+    
     auto analysis = AddSectionAnalysis(component, component->xZConstructionPlane(), 0);
     analysis->flip();
     Rotate(analysis, RAD_45, rightAxis);

@@ -2,6 +2,7 @@
 
 #include "FusionEnvironment.h"
 #include "BasePart.h"
+#include "RectangledBasePart.h"
 #include "RoofPart.h"
 #include "RectangledRoofPart.h"
 #include "VolfDownPart.h"
@@ -22,7 +23,7 @@ class Rings2D2Squares
     };
 
 public:
-    BasePart basePart;
+    RectangledBasePart basePart;
     RectangledRoofPart roofPart;
     VolfUpPart volfUpPart;
     VolfDownPart volfDownPart;
@@ -48,6 +49,9 @@ private:
     
     Ptr<Point3D> getLeftCenterPoint();
     Ptr<Point3D> getRightCenterPoint();
+
+    void SetParams(RectangledBasePart& basePart, RectangledRoofPart& roofPart, VolfUpPart& volfUpPart, VolfDownPart& volfDownPart);
+    void SetParams(BasePart& basePart, RoofPart& roofPart, VolfUpPart& volfUpPart, VolfDownPart& volfDownPart);
 public:
     void createBodies(Ptr<Component> component);
 };

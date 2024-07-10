@@ -16,6 +16,22 @@ Ptr<Point3D> GetCirclePoint(Ptr<Point3D> circleCenter, double radius, double ang
     return Point3D::create(circleCenter->x() + radius * cos(angel), circleCenter->y() + radius * sin(angel), saveZ ? circleCenter->z() : 0);
 }
 
+
+Ptr<BoundingBox3D> CreateBound(double top, double bottom, double left, double right)
+{
+    return BoundingBox3D::create(Point3D::create(left, bottom), Point3D::create(right, top));
+}
+
+Ptr<BoundingBox3D> CutShell(Ptr<BoundingBox3D> box, double shellThickness)
+{
+    auto minPoint = box->minPoint();
+    auto maxPoint = box->maxPoint();
+    auto newMinPoint = Point3D::create(minPoint->x() + shellThickness, minPoint->y() + shellThickness);
+    auto newMaxPoint = Point3D::create(maxPoint->x() - shellThickness, maxPoint->y() - shellThickness);
+    return BoundingBox3D::create(newMinPoint, newMaxPoint);
+}
+
+
 bool Equal(double a, double b, double delta)
 {
     return abs(a - b) < delta;
@@ -450,6 +466,30 @@ Ptr<BRepBody> CreateBox(Ptr<Component> component, Ptr<Point3D> point1, Ptr<Point
     auto line3 = AddLine(sketch, line2->endSketchPoint()->geometry(), Point3D::create(point1->x(), point2->y()));
     auto line4 = AddLine(sketch, line3->endSketchPoint()->geometry(), line1->startSketchPoint()->geometry());
     return Extrude(component, sketch->profiles()->item(0), height)->bodies()->item(0);
+}
+
+Ptr<BRepBody> CreateBox(Ptr<Component> component, Ptr<Point3D> point1, Ptr<Point3D> point2, double height, double verticalCornerFilletRadius)
+{
+    auto body = CreateBox(component, point1, point2, height);
+    if (verticalCornerFilletRadius > 0)
+    {
+        auto edges = GetEdges(body, EdgeIsVerticalLine);
+        Fillet(component, edges, verticalCornerFilletRadius);
+    }
+    return body;
+}
+
+Ptr<BRepBody> CreateBox(Ptr<Component> component, Ptr<Point3D> point1, Ptr<Point3D> point2, double height, double verticalCornerFilletRadius, double wallThicknness)
+{
+    auto body = CreateBox(component, point1, point2, height, verticalCornerFilletRadius);
+    if (wallThicknness <= 0)
+        return body;
+    auto xMax = fmax(point1->x(), point2->x()) - wallThicknness;
+    auto xMin = fmin(point1->x(), point2->x()) + wallThicknness;
+    auto yMax = fmax(point1->y(), point2->y()) - wallThicknness;
+    auto yMin = fmin(point1->y(), point2->y()) + wallThicknness;
+    auto cutBody = CreateBox(component, Point3D::create(xMax, yMax), Point3D::create(xMin, yMin), height, verticalCornerFilletRadius - wallThicknness);
+    return Combine(component, CutFeatureOperation, body, cutBody);
 }
 
 bool EdgeIsHorizontal(Ptr<BRepEdge> edge)

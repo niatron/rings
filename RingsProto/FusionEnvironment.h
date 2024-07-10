@@ -41,6 +41,10 @@ struct VectorPoint
 Ptr<Point3D> GetCenterPoint();
 Ptr<Point3D> GetCirclePoint(double radius, double angel);
 Ptr<Point3D> GetCirclePoint(Ptr<Point3D> circleCenter, double radius, double angel, bool saveZ = false);
+
+Ptr<BoundingBox3D> CreateBound(double top, double bottom, double left, double right);
+Ptr<BoundingBox3D> CutShell(Ptr<BoundingBox3D> box, double shellThickness);
+
 bool Equal(double a, double b, double delta = 0.001);
 bool Equal(Ptr<Point3D> p1, Ptr<Point3D> p2, double delta = 0.001);
 bool Equal(Ptr<SketchLine> line, Ptr<BRepEdge> edge, double delta = 0.001);
@@ -101,7 +105,10 @@ VectorPoint ConstructionAxisToVectorPoint(Ptr<ConstructionAxis> axis);
 
 Ptr<BRepBody> CreateSphere(Ptr<Component> component, Ptr<Point3D> center, double radius);
 Ptr<BRepBody> CreateCylinder(Ptr<Component> component, Ptr<Point3D> center, double radius, double height);
+
 Ptr<BRepBody> CreateBox(Ptr<Component> component, Ptr<Point3D> point1, Ptr<Point3D> point2, double height);
+Ptr<BRepBody> CreateBox(Ptr<Component> component, Ptr<Point3D> point1, Ptr<Point3D> point2, double height, double verticalCornerFilletRadius);
+Ptr<BRepBody> CreateBox(Ptr<Component> component, Ptr<Point3D> point1, Ptr<Point3D> point2, double height, double verticalCornerFilletRadius, double wallThicknness);
 
 bool EdgeIsHorizontal(Ptr<BRepEdge> edge);
 bool EdgeIsVerticalLine(Ptr<BRepEdge> edge);

@@ -4,7 +4,8 @@
 class RectangledRoofPart : public RoofPart
 {
 public:
-    double cornerFilletRadius = 1.0;
+    double deepThickness;
+    double cornerFilletRadius;
     Ptr<ObjectCollection> createBodies(Ptr<Component> component);
 private:
     Ptr<BRepBody> createBody(Ptr<Component> component);
