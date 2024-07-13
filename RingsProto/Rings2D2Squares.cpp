@@ -168,6 +168,16 @@ void Rings2D2Squares::SetParams(RectangledBasePart& basePart, RectangledRoofPart
     basePart.otherEdgeFilletRadius = horizontalEdgeFilletRadius;
     basePart.cuttingShellThickness = basePart.wallThickness + roofPart.wallThickness;
     basePart.cornerFilletRadius = roofPart.cornerFilletRadius - roofPart.wallThickness;
+    basePart.centralLinkerRadius = 0.2;
+    
+    basePart.linkingPart.floorState = LinkingPart::FloorStates::Top;
+    basePart.linkingPart.isReverse = false;
+    basePart.linkingPart.floorHoleRadius = 0.15;
+    basePart.linkingPart.floorThickness = 0.2;
+    basePart.linkingPart.wallThickness = 0.16;
+    basePart.linkingPart.radius = basePart.linkingPart.wallThickness + 0.34;
+    basePart.linkingPart.height = basePart.linkingPart.floorThickness + 0.44;
+    basePart.linkingPart.z = 0;
 
     roofPart.lineLength = getLineLength();
     roofPart.cornerMiddleRadius = getCornerOuterRadius() - getVolfRadius();
@@ -184,6 +194,17 @@ void Rings2D2Squares::SetParams(RectangledBasePart& basePart, RectangledRoofPart
     roofPart.verticalEdgeFilletRadius = verticalEdgeFilletRadius;
     roofPart.otherEdgeFilletRadius = horizontalEdgeFilletRadius / 2.0;
     roofPart.deepThickness = basePart.floorThickness;
+    roofPart.centralLinkerRadius = basePart.centralLinkerRadius + unmoovableClearence;
+    
+    roofPart.linkingPart.floorState = LinkingPart::FloorStates::Top;
+    roofPart.linkingPart.isReverse = true;
+    roofPart.linkingPart.floorThickness = 0.2;
+    roofPart.linkingPart.radius = basePart.linkingPart.radius + roofPart.wallThickness;
+    roofPart.linkingPart.floorHoleRadius = basePart.linkingPart.radius + unmoovableClearence;
+    roofPart.linkingPart.wallThickness = roofPart.linkingPart.radius - 0.14;
+    roofPart.linkingPart.z = roofPart.height - roofPart.wallThickness;
+    roofPart.linkingPart.height = roofPart.linkingPart.z - basePart.linkingPart.height + roofPart.linkingPart.floorThickness - unmoovableClearence;
+    
 
     volfUpPart.zMoveShift = basePart.height + unmoovableClearence + roofPart.floorThickness + moovableClearence;
 }

@@ -53,6 +53,9 @@
     <ClInclude Include="RectangledBasePart.h">
       <Filter>Rings2DSquares</Filter>
     </ClInclude>
+    <ClInclude Include="LinkingPart.h">
+      <Filter>Rings2DSquares</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Rings2DSquares">

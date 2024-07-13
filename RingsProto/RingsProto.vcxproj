@@ -118,6 +118,7 @@
     <ClInclude Include="BasePart.h" />
     <ClInclude Include="FusionEnvironment.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="LinkingPart.h" />
     <ClInclude Include="RectangledBasePart.h" />
     <ClInclude Include="RectangledRoofPart.h" />
     <ClInclude Include="Rings2D2Circles.h" />
