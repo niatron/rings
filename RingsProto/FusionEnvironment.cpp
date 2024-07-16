@@ -277,6 +277,15 @@ Ptr<RevolveFeature> Revolve(Ptr<Component> component, Ptr<Sketch> sketch, Ptr<Co
     return Revolve(component, sketch->profiles()->item(0), axis, angelRad);
 }
 
+
+Ptr<ExtrudeFeature> Extrude(Ptr<Component> component, Ptr<ObjectCollection> collection, double distance, bool isSymetric)
+{
+    auto input = component->features()->extrudeFeatures()->createInput(collection, FeatureOperations::NewBodyFeatureOperation);
+    input->setDistanceExtent(isSymetric, ValueInput::createByReal(distance));
+    auto feature = component->features()->extrudeFeatures()->add(input);
+    return feature;
+}
+
 Ptr<ExtrudeFeature> Extrude(Ptr<Component> component, Ptr<Profile> profile, double distance, bool isSymetric)
 {
     auto input = component->features()->extrudeFeatures()->createInput(profile, FeatureOperations::NewBodyFeatureOperation);
@@ -354,6 +363,17 @@ Ptr<FilletFeature> Fillet(Ptr<Component> component, Ptr<ObjectCollection> edges,
 	return filletFeatures->add(filletInput);
 }
 
+
+bool HasCommonEdge(Ptr<BRepFace> face1, Ptr<BRepFace> face2)
+{
+    for (auto edge1 : face1->edges())
+        for (auto edge2 : face2->edges())
+            if (edge1->entityToken() == edge2->entityToken() )
+                return true;
+    return false;
+}
+
+
 Ptr<ObjectCollection> GetEdges(Ptr<BRepBody> body, std::function <bool(Ptr<BRepEdge>)> isGoodEdge)
 {
 	auto collection = ObjectCollection::create();
@@ -421,6 +441,24 @@ double GetMin(Ptr<ObjectCollection> items, std::function <double(Ptr<Base>)> get
     }
     return result;
 }
+
+
+Ptr<ObjectCollection> GetProfiles(Ptr<Sketch> sketch, std::function <bool(Ptr<Profile>)> isGoodProfile)
+{
+    {
+        auto collection = ObjectCollection::create();
+        auto profiles = sketch->profiles();
+        for (int i = 0; i < profiles->count(); i++)
+        {
+            auto profile = profiles->item(i);
+
+            if (isGoodProfile(profile))
+                collection->add(profile);
+        }
+        return collection;
+    }
+}
+
 
 Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis)
 {

@@ -25,6 +25,9 @@
     <ClCompile Include="RectangledBasePart.cpp">
       <Filter>Rings2DSquares</Filter>
     </ClCompile>
+    <ClCompile Include="Sketcher.cpp">
+      <Filter>Rings2DSquares</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="RingsProto.manifest" />
@@ -54,6 +57,12 @@
       <Filter>Rings2DSquares</Filter>
     </ClInclude>
     <ClInclude Include="LinkingPart.h">
+      <Filter>Rings2DSquares</Filter>
+    </ClInclude>
+    <ClInclude Include="Sketcher.h">
+      <Filter>Rings2DSquares</Filter>
+    </ClInclude>
+    <ClInclude Include="PariedSquaresPart.h">
       <Filter>Rings2DSquares</Filter>
     </ClInclude>
   </ItemGroup>

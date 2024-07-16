@@ -105,6 +105,7 @@
     </ClCompile>
     <ClCompile Include="RingsProtoCreator.cpp" />
     <ClCompile Include="RoofPart.cpp" />
+    <ClCompile Include="Sketcher.cpp" />
     <ClCompile Include="VolfDownPart.cpp" />
     <ClCompile Include="VolfUpPart.cpp" />
   </ItemGroup>
@@ -125,8 +126,10 @@
     <ClInclude Include="Rings2D2Squares.h" />
     <ClInclude Include="RingsProtoCreator.h" />
     <ClInclude Include="RoofPart.h" />
+    <ClInclude Include="Sketcher.h" />
     <ClInclude Include="VolfDownPart.h" />
     <ClInclude Include="VolfUpPart.h" />
+    <ClInclude Include="PariedSquaresPart.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

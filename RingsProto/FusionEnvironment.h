@@ -85,6 +85,7 @@ Ptr<SketchLine> AddLine(Ptr<Sketch> sketch, double startPointX, double startPoin
 
 Ptr<RevolveFeature> Revolve(Ptr<Component> component, Ptr<Profile> profile, Ptr<ConstructionAxis> axis, double angelRad);
 Ptr<RevolveFeature> Revolve(Ptr<Component> component, Ptr<Sketch> sketch, Ptr<ConstructionAxis> axis, double angelRad);
+Ptr<ExtrudeFeature> Extrude(Ptr<Component> component, Ptr<ObjectCollection> collection, double distance, bool isSymetric = false);
 Ptr<ExtrudeFeature> Extrude(Ptr<Component> component, Ptr<Profile> profile, double distance, bool isSymetric = false);
 Ptr<ExtrudeFeature> Extrude(Ptr<Component> component, Ptr<Sketch> sketch, double distance, bool isSymetric = false);
 Ptr<ObjectCollection> ExtrudeAll(Ptr<Component> component, Ptr<Sketch> sketch, double distance, bool isSymetric = false);
@@ -95,10 +96,14 @@ Ptr<BRepBody> Combine(Ptr<Component> component, FeatureOperations operation, Ptr
 Ptr<CombineFeature> CreateCombineFeature(Ptr<Component> component, FeatureOperations operation, Ptr<BRepBody> body1, Ptr<BRepBody> body2);
 Ptr<FilletFeature> Fillet(Ptr<Component> component, Ptr<ObjectCollection> edges, double val);
 
+bool HasCommonEdge(Ptr<BRepFace> face1, Ptr<BRepFace> face2);
+
 Ptr<ObjectCollection> GetEdges(Ptr<BRepBody> body, std::function <bool(Ptr<BRepEdge>)> isGoodEdge);
 Ptr<ObjectCollection> GetEdges(Ptr<ObjectCollection> edges, std::function <bool(Ptr<BRepEdge>)> isGoodEdge);
 Ptr<ObjectCollection> GetEdges(std::vector<Ptr<BRepFace>> joinedFaces, std::vector<Ptr<BRepFace>> unjoinedFaces);
 double GetMin(Ptr<ObjectCollection> items, std::function <double(Ptr<Base>)> getValue);
+
+Ptr<ObjectCollection> GetProfiles(Ptr<Sketch> sketch, std::function <bool(Ptr<Profile>)> isGoodProfile);
 
 Ptr<Vector3D> ConstructionAxisToVector3D(Ptr<ConstructionAxis> axis);
 VectorPoint ConstructionAxisToVectorPoint(Ptr<ConstructionAxis> axis);
