@@ -7,6 +7,8 @@
 #include "RectangledRoofPart.h"
 #include "VolfDownPart.h"
 #include "VolfUpPart.h"
+#include "PariedSquaresPart.h"
+#include "PariedSquaresWithOuterRectanglePart.h"
 
 using namespace adsk::core;
 using namespace adsk::fusion;

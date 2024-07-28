@@ -28,6 +28,9 @@
     <ClCompile Include="Sketcher.cpp">
       <Filter>Rings2DSquares</Filter>
     </ClCompile>
+    <ClCompile Include="PariedSquaresWithOuterRectanglePart.h">
+      <Filter>Rings2DSquares</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="RingsProto.manifest" />

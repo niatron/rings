@@ -263,6 +263,33 @@ Ptr<SketchLine> AddLine(Ptr<Sketch> sketch, double startPointX, double startPoin
     return AddLine(sketch, Point3D::create(startPointX, startPointY, startPointZ), Point3D::create(endPointX, endPointY, endPointZ));
 }
 
+Ptr<ObjectCollection> AddRectangle(Ptr<Sketch> sketch, Ptr<Point3D> center, double width, double height, double cornerRadius)
+{
+    auto horizontalLineLength = width - 2.0 * cornerRadius;
+    auto verticalLineLength = height - 2.0 * cornerRadius;
+
+    auto p1 = Point3D::create(center->x() - horizontalLineLength / 2.0, center->y() + height / 2.0);
+    auto p2 = Point3D::create(p1->x() + horizontalLineLength, p1->y());
+    auto p3 = Point3D::create(p2->x() + cornerRadius, p2->y() - cornerRadius);
+    auto p4 = Point3D::create(p3->x(), p3->y() - verticalLineLength);
+    auto p5 = Point3D::create(p2->x(), p2->y() - height);
+    auto p6 = Point3D::create(p1->x(), p1->y() - height);
+    auto p7 = Point3D::create(p4->x() - width, p4->y());
+    auto p8 = Point3D::create(p3->x() - width, p3->y());
+
+    auto curves = createObjectCollection({
+        AddLine(sketch, p1, p2),
+        AddArc(sketch, Point3D::create(p2->x(), p3->y()), p3, p2),
+        AddLine(sketch, p3, p4),
+        AddArc(sketch, Point3D::create(p5->x(), p4->y()), p5, p4),
+        AddLine(sketch, p5, p6),
+        AddArc(sketch, Point3D::create(p6->x(), p7->y()), p7, p6),
+        AddLine(sketch, p7, p8),
+        AddArc(sketch, Point3D::create(p1->x(), p8->y()), p1, p8)
+        });
+    return curves;
+}
+
 
 Ptr<RevolveFeature> Revolve(Ptr<Component> component, Ptr<Profile> profile, Ptr<ConstructionAxis> axis, double angelRad)
 {

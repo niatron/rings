@@ -22,12 +22,37 @@ Ptr<BRepBody> RectangledBasePart::createBody(Ptr<Component> component)
     auto intersectBody = CreateBox(component, box->minPoint(), box->maxPoint(), height);
     body = Combine(component, IntersectFeatureOperation, body, intersectBody);
 
-    auto magnetSketch = createCirclesSketch(component, circlesOnSquareRadius, 0);
-
-    for (int i = 0; i < magnetSketch->profiles()->count(); i++)
+    auto createHalForMagnet = false;
+    if (createHalForMagnet)
     {
-        auto magnetBody = Extrude(component, magnetSketch->profiles()->item(i), floorThickness * 3.0, false);
-        body = Combine(component, CutFeatureOperation, body, magnetBody->bodies()->item(0));
+        auto magnetSketch = createCirclesSketch(component, circlesOnSquareRadius, 0);
+
+        for (int i = 0; i < magnetSketch->profiles()->count(); i++)
+        {
+            auto magnetBody = Extrude(component, magnetSketch->profiles()->item(i), floorThickness * 3.0, false);
+            body = Combine(component, CutFeatureOperation, body, magnetBody->bodies()->item(0));
+        }
+    }
+
+    if (!isPapaCenterPart)
+    {
+        PariedSquaresPart innerWallPart;
+
+        innerWallPart.lineLength = lineLength;
+        innerWallPart.cornerOuterRadius = cornerOuterRadius - width + wallThickness * 2.0;
+        innerWallPart.rotateAngel = RAD_45;
+        innerWallPart.height = height;
+        innerWallPart.thickness = wallThickness;
+        innerWallPart.leftCenterPoint = leftCenterPoint;
+        innerWallPart.rightCenterPoint = rightCenterPoint;
+        innerWallPart.initialize(component);
+
+        auto centerJoinBody = innerWallPart.createInnerWallBody();
+        auto centerBox = centerJoinBody->boundingBox();
+        auto centerCutBody = CreateBox(component, centerBox->minPoint(), centerBox->maxPoint(), height);
+        centerCutBody = Move(component, centerCutBody, component->zConstructionAxis(), floorThickness);
+        body = Combine(component, CutFeatureOperation, body, centerCutBody);
+        body = Combine(component, JoinFeatureOperation, body, centerJoinBody);
     }
 
     auto shift = cornerFilletRadius - cornerFilletRadius / sqrt(2.0) + linkingPart.radius / sqrt(2.0) + 0.03;
@@ -55,4 +80,27 @@ Ptr<BRepBody> RectangledBasePart::createBody(Ptr<Component> component)
     filletBody(component, body);
 
     return body;
+}
+
+void RectangledBasePart::filletBody(Ptr<Component> component, Ptr<BRepBody> body)
+{
+    auto edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsVerticalLine(edge) && abs(edge->endVertex()->geometry()->x()) <= 0.01 && abs(edge->endVertex()->geometry()->y()) < innerWidth + outerWidth; });
+    auto minY = GetMin(edges, [=](Ptr<BRepEdge> edge) {return abs(edge->endVertex()->geometry()->y()); });
+    edges = GetEdges(edges, [=](Ptr<BRepEdge> edge) {return abs(edge->endVertex()->geometry()->y()) < minY + 0.01; });
+    Fillet(component, edges, verticalEdgeFilletRadius / 2.0);
+
+    edges = GetEdges(body, EdgeIsVerticalLine);
+    Fillet(component, edges, verticalEdgeFilletRadius);
+
+    edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && Equal(edge->length(), GetCircleLength(linkingPart.radius), 0.02) && edge->endVertex()->geometry()->z() > floorThickness * 1.1; });
+    Fillet(component, edges, topEdgeFilletRadius * 2.0);
+
+    edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && edge->endVertex()->geometry()->z() > floorThickness * 1.1; });
+    Fillet(component, edges, topEdgeFilletRadius);
+
+    edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && Equal(edge->length(), GetCircleLength(circlesOnSquareRadius), 0.1); });
+    Fillet(component, edges, floorThickness / 3.0);
+
+    edges = GetEdges(body, EdgeIsHorizontal);
+    Fillet(component, edges, otherEdgeFilletRadius);
 }

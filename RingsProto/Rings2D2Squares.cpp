@@ -133,7 +133,7 @@ void Rings2D2Squares::SetParams(RectangledBasePart& basePart, RectangledRoofPart
     roofPart.cornerFilletRadius = getVolfRadius() * 2.0;
 
     volfDownPart.radius = volfRadius;
-    volfDownPart.height = 0.54;
+    volfDownPart.height = 0.44;
     volfDownPart.holeDownRadius = 0.28;
     volfDownPart.holeDownHeight = 0.3;
     volfDownPart.holeRadius = 0.15;
@@ -165,7 +165,7 @@ void Rings2D2Squares::SetParams(RectangledBasePart& basePart, RectangledRoofPart
     basePart.circlesOnSquarePeriodRadius = getVolfRadius();
     basePart.topEdgeFilletRadius = horizontalEdgeFilletRadius / 2.0;
     basePart.verticalEdgeFilletRadius = verticalEdgeFilletRadius;
-    basePart.otherEdgeFilletRadius = horizontalEdgeFilletRadius;
+    basePart.otherEdgeFilletRadius = horizontalEdgeFilletRadius / 2.0;
     basePart.cuttingShellThickness = basePart.wallThickness + roofPart.wallThickness;
     basePart.cornerFilletRadius = roofPart.cornerFilletRadius - roofPart.wallThickness;
     basePart.centralLinkerRadius = 0.2;
@@ -211,6 +211,29 @@ void Rings2D2Squares::SetParams(RectangledBasePart& basePart, RectangledRoofPart
 
 void Rings2D2Squares::createBodies(Ptr<Component> component)
 {
+    /*PariedSquaresWithOuterRectanglePart part;
+
+    part.lineLength = getLineLength();
+    part.cornerOuterRadius = getCornerOuterRadius();
+    part.rotateAngel = RAD_45;
+    part.height = 1;
+    part.thickness = 0.1;
+    part.leftCenterPoint = getLeftCenterPoint();
+    part.rightCenterPoint = getRightCenterPoint();
+    part.rectangleWidth = 2.0 * part.getRight();
+    part.rectangleHeight = 2.0 * part.getTop();
+    part.rectangleCornerRadius = getVolfRadius() * 2.0;
+    part.initialize(component);
+    
+    part.createCenterBody();
+    part.createInnerWallBody();
+    part.createOuterWallBody();
+    part.createLeftCenterBody();
+    part.createRightCenterBody();
+    part.createRectangleBody();
+
+    return;*/
+
     SetParams(basePart, roofPart, volfUpPart, volfDownPart);
 
     if (leftAxis == nullptr)
@@ -261,8 +284,10 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
         Ptr<BRepBody> roofBody = roofBodies->item(i);
         SaveAsStl(roofBody, modelsFolderPath + roofBody->name() + ".stl");
     }
-    
-    SaveAsStl(volfUpBody, modelsFolderPath + "VolfUpBody.stl");
-    SaveAsStl(volfDownBody, modelsFolderPath + "VolfDownBody.stl");
-
+    if (volfUpBody != nullptr && volfDownBody != nullptr)
+    {
+        SaveAsStl(volfUpBody, modelsFolderPath + "VolfUpBody.stl");
+        SaveAsStl(volfDownBody, modelsFolderPath + "VolfDownBody.stl");
+    }
+    MessageBox("All Done :)");
 }

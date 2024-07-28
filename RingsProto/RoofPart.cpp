@@ -73,11 +73,11 @@ void RoofPart::filletBody(Ptr<Component> component, Ptr<BRepBody> body)
     edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return edgeOnInnerCorner(edge); });
     Fillet(component, edges, otherEdgeFilletRadius);
 
-    edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && edge->endVertex()->geometry()->z() > floorThickness * 1.1; });
-    Fillet(component, edges, topEdgeFilletRadius);
-
     edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && Equal(edge->length(), GetCircleLength(circlesOnSquareRadius), 0.1); });
     Fillet(component, edges, floorThickness / 3.0);
+
+    edges = GetEdges(body, [=](Ptr<BRepEdge> edge) {return EdgeIsHorizontal(edge) && edge->endVertex()->geometry()->z() > floorThickness * 1.1; });
+    Fillet(component, edges, topEdgeFilletRadius);
 
     edges = GetEdges(body, EdgeIsHorizontal);
     Fillet(component, edges, otherEdgeFilletRadius);
