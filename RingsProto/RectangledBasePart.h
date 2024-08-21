@@ -13,6 +13,7 @@ public:
     LinkingPart linkingPart;
 
     Ptr<BRepBody> createBody(Ptr<Component> component);
+    std::vector<Ptr<Point3D>> getLinkerPoints();
 protected:
     void filletBody(Ptr<Component> component, Ptr<BRepBody> body);
 };

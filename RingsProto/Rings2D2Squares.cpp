@@ -55,9 +55,20 @@ Ptr<Point3D> Rings2D2Squares::getRightCenterPoint()
     return Point3D::create(getSquareShift());
 }
 
+void Rings2D2Squares::SetParams(MetizParams& linkMetizParams)
+{
+    linkMetizParams.hatForm = MetizParams::HatForms::Hided;
+    linkMetizParams.hatRadius = 0.24;
+    linkMetizParams.hatHeight = 0.16;
+    linkMetizParams.legRadius = 0.12;
+    linkMetizParams.legHeight = 0.68;
+}
+
 void Rings2D2Squares::SetParams(BasePart& basePart, RoofPart& roofPart, VolfUpPart& volfUpPart, VolfDownPart& volfDownPart)
 {
     auto volfRadius = getVolfRadius() - moovableClearence / (cornerVolfCount * 4.0 + lineVolfCount * 4.0);
+
+    SetParams(linkMetizParams);
 
     basePart.floorThickness = 0.3;
     basePart.wallThickness = 0.16;
@@ -124,6 +135,8 @@ void Rings2D2Squares::SetParams(RectangledBasePart& basePart, RectangledRoofPart
 {
     auto volfRadius = getVolfRadius() - moovableClearence / (cornerVolfCount * 4.0 + lineVolfCount * 4.0);
 
+    SetParams(linkMetizParams);
+
     basePart.floorThickness = 0.3;
     basePart.wallThickness = 0.16;
     basePart.circlesOnSquareRadius = 0.25;
@@ -172,11 +185,11 @@ void Rings2D2Squares::SetParams(RectangledBasePart& basePart, RectangledRoofPart
     
     basePart.linkingPart.floorState = LinkingPart::FloorStates::Top;
     basePart.linkingPart.isReverse = false;
-    basePart.linkingPart.floorHoleRadius = 0.15;
-    basePart.linkingPart.floorThickness = 0.2;
+    basePart.linkingPart.floorHoleRadius = linkMetizParams.legRadius + moovableClearence;
+    basePart.linkingPart.floorThickness = 0.12;
     basePart.linkingPart.wallThickness = 0.16;
-    basePart.linkingPart.radius = basePart.linkingPart.wallThickness + 0.34;
-    basePart.linkingPart.height = basePart.linkingPart.floorThickness + 0.44;
+    basePart.linkingPart.radius = basePart.linkingPart.wallThickness + linkMetizParams.hatRadius + moovableClearence;
+    basePart.linkingPart.height = basePart.floorThickness;
     basePart.linkingPart.z = 0;
 
     roofPart.lineLength = getLineLength();
@@ -198,42 +211,27 @@ void Rings2D2Squares::SetParams(RectangledBasePart& basePart, RectangledRoofPart
     
     roofPart.linkingPart.floorState = LinkingPart::FloorStates::Top;
     roofPart.linkingPart.isReverse = true;
-    roofPart.linkingPart.floorThickness = 0.2;
-    roofPart.linkingPart.radius = basePart.linkingPart.radius + roofPart.wallThickness;
-    roofPart.linkingPart.floorHoleRadius = basePart.linkingPart.radius + unmoovableClearence;
-    roofPart.linkingPart.wallThickness = roofPart.linkingPart.radius - 0.14;
+    roofPart.linkingPart.floorThickness = 0.0;
+    roofPart.linkingPart.radius = linkMetizParams.legRadius + 0.2;
+    roofPart.linkingPart.floorHoleRadius = 0.0;
+    roofPart.linkingPart.wallThickness = roofPart.linkingPart.radius - linkMetizParams.legRadius;
     roofPart.linkingPart.z = roofPart.height - roofPart.wallThickness;
-    roofPart.linkingPart.height = roofPart.linkingPart.z - basePart.linkingPart.height + roofPart.linkingPart.floorThickness - unmoovableClearence;
+    roofPart.linkingPart.height = roofPart.linkingPart.z - basePart.linkingPart.height - unmoovableClearence;
     
 
     volfUpPart.zMoveShift = basePart.height + unmoovableClearence + roofPart.floorThickness + moovableClearence;
 }
 
+void saveBodyAssStl(Ptr<Component> component)
+{
+    std::string tempPath = "D:\\ServerTechnology\\RingsModels\\TempBody.stl";
+    auto tmpBody = component->bRepBodies()->item(0);
+    SaveAsStl(tmpBody, tempPath);
+    return;
+}
+
 void Rings2D2Squares::createBodies(Ptr<Component> component)
 {
-    /*PariedSquaresWithOuterRectanglePart part;
-
-    part.lineLength = getLineLength();
-    part.cornerOuterRadius = getCornerOuterRadius();
-    part.rotateAngel = RAD_45;
-    part.height = 1;
-    part.thickness = 0.1;
-    part.leftCenterPoint = getLeftCenterPoint();
-    part.rightCenterPoint = getRightCenterPoint();
-    part.rectangleWidth = 2.0 * part.getRight();
-    part.rectangleHeight = 2.0 * part.getTop();
-    part.rectangleCornerRadius = getVolfRadius() * 2.0;
-    part.initialize(component);
-    
-    part.createCenterBody();
-    part.createInnerWallBody();
-    part.createOuterWallBody();
-    part.createLeftCenterBody();
-    part.createRightCenterBody();
-    part.createRectangleBody();
-
-    return;*/
-
     SetParams(basePart, roofPart, volfUpPart, volfDownPart);
 
     if (leftAxis == nullptr)
@@ -245,7 +243,7 @@ void Rings2D2Squares::createBodies(Ptr<Component> component)
     volfsSketch->isLightBulbOn(false);
 
     auto baseBody = basePart.createBody(component);
-    auto roofBodies = roofPart.createBodies(component);
+    auto roofBodies = roofPart.createBodies(component, basePart.getLinkerPoints());
     
     Ptr<BRepBody> volfDownBody;
     Ptr<BRepBody> volfUpBody;

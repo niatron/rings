@@ -1,5 +1,25 @@
 #include "RectangledBasePart.h"
 
+std::vector<Ptr<Point3D>> RectangledBasePart::getLinkerPoints()
+{
+    auto shift = cornerFilletRadius - cornerFilletRadius / sqrt(2.0) + linkingPart.radius / sqrt(2.0) + wallThickness / sqrt(2.0);
+    auto cornerOuterRadius = cornerMiddleRadius + outerWidth;
+    auto size = lineLength / sqrt(2.0) + cornerOuterRadius - cuttingShellThickness;
+    auto top = rightCenterPoint->y() + size;
+    auto right = rightCenterPoint->x() + size;
+    auto left = leftCenterPoint->x() - size;
+    auto down = leftCenterPoint->y() - size;
+    
+    std::vector<Ptr<Point3D>> points;
+    points.push_back(Point3D::create(right - shift, top - shift));
+    points.push_back(Point3D::create(right - shift, down + shift));
+    points.push_back(Point3D::create(left + shift, top - shift));
+    points.push_back(Point3D::create(left + shift, down + shift));
+    //points.push_back(Point3D::create(0, top - linkingPart.radius));
+    //points.push_back(Point3D::create(0, down + linkingPart.radius));
+    return points;
+}
+
 Ptr<BRepBody> RectangledBasePart::createBody(Ptr<Component> component)
 {
     auto cornerOuterRadius = cornerMiddleRadius + outerWidth;
@@ -22,7 +42,7 @@ Ptr<BRepBody> RectangledBasePart::createBody(Ptr<Component> component)
     auto intersectBody = CreateBox(component, box->minPoint(), box->maxPoint(), height);
     body = Combine(component, IntersectFeatureOperation, body, intersectBody);
 
-    auto createHalForMagnet = false;
+    auto createHalForMagnet = true;
     if (createHalForMagnet)
     {
         auto magnetSketch = createCirclesSketch(component, circlesOnSquareRadius, 0);
@@ -55,16 +75,9 @@ Ptr<BRepBody> RectangledBasePart::createBody(Ptr<Component> component)
         body = Combine(component, JoinFeatureOperation, body, centerJoinBody);
     }
 
-    auto shift = cornerFilletRadius - cornerFilletRadius / sqrt(2.0) + linkingPart.radius / sqrt(2.0) + 0.03;
-    std::vector<Ptr<Point3D>> points;
     auto top = box->maxPoint()->y();
-    auto right = box->maxPoint()->x();
-    auto left = box->minPoint()->x();
     auto down = box->minPoint()->y();
-    points.push_back(Point3D::create(right - shift, top - shift));
-    points.push_back(Point3D::create(right - shift, down + shift));
-    points.push_back(Point3D::create(left + shift, top - shift));
-    points.push_back(Point3D::create(left + shift, down + shift));
+    auto points = getLinkerPoints();
     for (auto point : points)
     {
         linkingPart.center = point;

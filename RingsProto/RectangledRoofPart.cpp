@@ -1,6 +1,6 @@
 #include "RectangledRoofPart.h"
 
-Ptr<ObjectCollection> RectangledRoofPart::createBodies(Ptr<Component> component)
+Ptr<ObjectCollection> RectangledRoofPart::createBodies(Ptr<Component> component, std::vector<Ptr<Point3D>> linkerPoints)
 {
     auto cornerOuterRadius = cornerMiddleRadius + outerWidth;
     auto width = outerWidth + innerWidth;
@@ -86,7 +86,7 @@ Ptr<ObjectCollection> RectangledRoofPart::createBodies(Ptr<Component> component)
         centerBody = Combine(component, JoinFeatureOperation, centerBody, centerJoinBody);
     }
 
-    mainBody = addLinkersToMainBody(component, mainBody);
+    mainBody = addLinkersToMainBody(component, mainBody, linkerPoints);
     mainBody->name("MainRoofBody");
     result->add(mainBody);
     
@@ -98,20 +98,12 @@ Ptr<ObjectCollection> RectangledRoofPart::createBodies(Ptr<Component> component)
     return result;
 }
 
-Ptr<BRepBody> RectangledRoofPart::addLinkersToMainBody(Ptr<Component> component, Ptr<BRepBody>& body)
+Ptr<BRepBody> RectangledRoofPart::addLinkersToMainBody(Ptr<Component> component, Ptr<BRepBody>& body, std::vector<Ptr<Point3D>> linkerPoints)
 {
     auto box = body->boundingBox();
-    auto shift = cornerFilletRadius - cornerFilletRadius / sqrt(2.0) + linkingPart.radius / sqrt(2.0) + 0.03;
-    std::vector<Ptr<Point3D>> points;
     auto top = box->maxPoint()->y();
-    auto right = box->maxPoint()->x();
-    auto left = box->minPoint()->x();
     auto down = box->minPoint()->y();
-    points.push_back(Point3D::create(right - shift, top - shift));
-    points.push_back(Point3D::create(right - shift, down + shift));
-    points.push_back(Point3D::create(left + shift, top - shift));
-    points.push_back(Point3D::create(left + shift, down + shift));
-    for (auto point : points)
+    for (auto point : linkerPoints)
     {
         linkingPart.center = point;
         linkingPart.joinedBody = body;

@@ -15,13 +15,15 @@ using namespace adsk::fusion;
 
 class Rings2D2Squares
 {
-    class Params
+    class MetizParams
     {
     public:
-        double baseOuterRadius;
-        double baseInnerRadius;
-        double baseWayHeight;
-        double baseWallHeight;
+        enum HatForms { Hided, Outer };
+        double hatRadius;
+        double hatHeight;
+        double legRadius;
+        double legHeight;
+        HatForms hatForm;
     };
 
 public:
@@ -29,6 +31,7 @@ public:
     RectangledRoofPart roofPart;
     VolfUpPart volfUpPart;
     VolfDownPart volfDownPart;
+    MetizParams linkMetizParams;
 
     double lineVolfCount = 1;
     double cornerVolfCount = 2;
@@ -54,6 +57,7 @@ private:
 
     void SetParams(RectangledBasePart& basePart, RectangledRoofPart& roofPart, VolfUpPart& volfUpPart, VolfDownPart& volfDownPart);
     void SetParams(BasePart& basePart, RoofPart& roofPart, VolfUpPart& volfUpPart, VolfDownPart& volfDownPart);
+    void SetParams(MetizParams& linkMetizParams);
 public:
     void createBodies(Ptr<Component> component);
 };
