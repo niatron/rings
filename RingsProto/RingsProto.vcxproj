@@ -107,6 +107,7 @@
     <ClCompile Include="RingsProtoCreator.cpp" />
     <ClCompile Include="RoofPart.cpp" />
     <ClCompile Include="Sketcher.cpp" />
+    <ClCompile Include="SpurGear.cpp" />
     <ClCompile Include="VolfDownPart.cpp" />
     <ClCompile Include="VolfUpPart.cpp" />
   </ItemGroup>
@@ -118,6 +119,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasePart.h" />
+    <ClInclude Include="DexpSpurGear.hpp" />
     <ClInclude Include="FusionEnvironment.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="LinkingPart.h" />
@@ -128,6 +130,7 @@
     <ClInclude Include="RingsProtoCreator.h" />
     <ClInclude Include="RoofPart.h" />
     <ClInclude Include="Sketcher.h" />
+    <ClInclude Include="SpurGear.hpp" />
     <ClInclude Include="VolfDownPart.h" />
     <ClInclude Include="VolfUpPart.h" />
     <ClInclude Include="PariedSquaresPart.h" />

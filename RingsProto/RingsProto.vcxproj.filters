@@ -31,6 +31,7 @@
     <ClCompile Include="PariedSquaresWithOuterRectanglePart.h">
       <Filter>Rings2DSquares</Filter>
     </ClCompile>
+    <ClCompile Include="SpurGear.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="RingsProto.manifest" />
@@ -68,6 +69,8 @@
     <ClInclude Include="PariedSquaresPart.h">
       <Filter>Rings2DSquares</Filter>
     </ClInclude>
+    <ClInclude Include="SpurGear.hpp" />
+    <ClInclude Include="DexpSpurGear.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Rings2DSquares">
